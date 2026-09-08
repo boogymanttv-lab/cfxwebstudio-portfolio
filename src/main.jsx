@@ -15,7 +15,22 @@ const FORMSPREE_ENDPOINT = `https://formspree.io/f/${FORMSPREE_FORM_ID}`;
 const ADMIN_USER = 'boogyman';
 const ADMIN_PASS = 'Boogyman#2026';
 const initialProjects = [{title:'AI System Income',desc:'Инвестиционна платформа с AI протоколи, депозити и crypto портфейл.',tags:'Next.js · TypeScript · Supabase',langs:'Next.js:45,TypeScript:35,Supabase:20',tone:'violet',image:'',website:'',github:''},{title:'Dani Dinner',desc:'Уебсайт за ресторант с онлайн поръчки, меню и административен панел.',tags:'Next.js · Tailwind CSS · Prisma',langs:'Next.js:50,Tailwind CSS:30,Prisma:20',tone:'green',image:'',website:'',github:''},{title:'Crypto Dashboard',desc:'Реално време crypto борд със статистики, графики и персонализирани alerts.',tags:'React · TypeScript · Chart.js',langs:'React:50,TypeScript:30,Chart.js:20',tone:'blue',image:'',website:'',github:''}];
-const initialServices = [{title:'Бизнес уебсайт',desc:'Презентационен сайт за бизнес или личен бранд — модерен дизайн, бърза скорост и SEO основи.',price:'от €349',oldPrice:'от €499',category:'foundation'},{title:'Онлайн магазин',desc:'Пълноценен e-commerce магазин с количка, плащания с карта, наложен платеж и админ панел за продукти и поръчки.',price:'от €899',oldPrice:'от €1400',category:'foundation'},{title:'Full-stack SaaS платформа',desc:'Цялостна платформа с потребители, абонаменти, база данни и админ логика — от идея до production.',price:'от €1899',oldPrice:'от €2900',category:'foundation'},{title:'Маркетплейс платформа',desc:'Платформа с много продавачи/потребители — обяви, съобщения, плащания и модерация, като Bazar.bg или OLX модел.',price:'от €1699',oldPrice:'от €2600',category:'foundation'},{title:'Административен панел / CRM',desc:'Вътрешна система за управление на клиенти, поръчки, служители или наличности, скроена по твоите процеси.',price:'от €699',oldPrice:'от €1100',category:'addon'},{title:'Автоматизации и API интеграции',desc:'Python, C#, Java и REST/API интеграции между системи, които премахват ръчната и повтаряща се работа.',price:'от €249',oldPrice:'от €399',category:'addon'},{title:'Telegram / Discord ботове',desc:'Персонализирани ботове за автоматизация, нотификации, поръчки или community management.',price:'от €199',oldPrice:'от €329',category:'addon'},{title:'AI интеграции',desc:'Вграждане на AI чатботове, автоматизирано съдържание или AI логика в съществуващ продукт.',price:'от €349',oldPrice:'от €549',category:'addon'},{title:'SEO и техническа оптимизация',desc:'Оптимизация на скорост, структура и видимост в Google — за да те намират реалните клиенти.',price:'от €199',oldPrice:'от €299',category:'addon'},{title:'Поддръжка и хостинг',desc:'Месечна поддръжка, ъпдейти, мониторинг и хостинг менажиране, за да работи всичко гладко след старта.',price:'от €69/мес',oldPrice:'от €99/мес',category:'addon'}];
+const initialServices = [{title:'Бизнес уебсайт',desc:'Презентационен сайт за бизнес или личен бранд — модерен дизайн, бърза скорост и SEO основи.',price:'от €349',oldPrice:'от €499',category:'foundation'},{title:'Онлайн магазин',desc:'Пълноценен e-commerce магазин с количка, плащания с карта, наложен платеж и админ панел за продукти и поръчки.',price:'от €899',oldPrice:'от €1400',category:'foundation'},{title:'Full-stack SaaS платформа',desc:'Цялостна платформа с потребители, абонаменти, база данни и админ логика — от идея до production.',price:'от €1899',oldPrice:'от €2900',category:'foundation'},{title:'Маркетплейс платформа',desc:'Платформа с много продавачи/потребители — обяви, съобщения, плащания и модерация, като Bazar.bg или OLX модел.',price:'от €1699',oldPrice:'от €2600',category:'foundation'},{title:'Административен панел / CRM',desc:'Вътрешна система за управление на клиенти, поръчки, служители или наличности, скроена по твоите процеси.',price:'от €699',oldPrice:'от €1100',category:'addon'},{title:'Автоматизации и API интеграции',desc:'Python, C#, Java и REST/API интеграции между системи, които премахват ръчната и повтаряща се работа.',price:'от €249',oldPrice:'от €399',category:'addon'},{title:'Telegram / Discord ботове',desc:'Персонализирани ботове за автоматизация, нотификации, поръчки или community management.',price:'от €199',oldPrice:'от €329',category:'addon'},{title:'AI интеграции',desc:'Вграждане на AI чатботове, автоматизирано съдържание или AI логика в съществуващ продукт.',price:'от €349',oldPrice:'от €549',category:'addon'},{title:'SEO и техническа оптимизация',desc:'Оптимизация на скорост, структура и видимост в Google — за да те намират реалните клиенти.',price:'от €199',oldPrice:'от €299',category:'addon'},{title:'Поддръжка и хостинг',desc:'Месечна поддръжка, ъпдейти, мониторинг и хостинг менажиране, за да работи всичко гладко след старта.',price:'от €69/мес',oldPrice:'от €99/мес',category:'addon'},{title:'GDPR / Бисквитки и поверителност',desc:'Банер за съгласие с бисквитки, политика за поверителност и технически преглед за GDPR съответствие.',price:'от €149',oldPrice:'от €229',category:'addon'},{title:'Многоезичност',desc:'Добавяне на допълнителен език към сайта — превод на съдържанието и SEO настройки за всеки език.',price:'от €249',oldPrice:'от €379',category:'addon'},{title:'Анализи и проследяване',desc:'Настройка на Google Analytics, проследяване на конверсии и базов dashboard с ключови показатели.',price:'от €149',oldPrice:'от €229',category:'addon'}];
+const serviceDetails = {
+  'Бизнес уебсайт': { features:['Персонализиран дизайн, съобразен с бранда ти','До 5 страници — начало, за нас/услуги, портфолио, контакти','Напълно адаптивен изглед — телефон, таблет, компютър','SEO основи — заглавия, описания, бърза скорост на зареждане','Форма за връзка с имейл известия','Хостинг настройка и качване онлайн'], note:'Не включва онлайн плащания или админ панел за съдържание — за това виж „Онлайн магазин“ или добави „Административен панел / CRM“.' },
+  'Онлайн магазин': { features:['Всичко от „Бизнес уебсайт“, плюс:','Каталог с продукти, категории и филтри','Количка и пълен процес на поръчка','Плащане с карта и наложен платеж','Админ панел за продукти, поръчки и наличности','Имейл известия при нова поръчка'], note:'Не включва абонаментни планове или много продавачи — за това виж „Full-stack SaaS платформа“ или „Маркетплейс платформа“.' },
+  'Full-stack SaaS платформа': { features:['Регистрация и вход на потребители','Абонаментни планове и повтарящи се плащания','База данни, изградена по твоята бизнес логика','Админ панел за управление на потребители и данни','Ролеви достъп (admin/user права)','Архитектура, готова да расте с потребителската база'] },
+  'Маркетплейс платформа': { features:['Регистрация на продавачи и купувачи','Публикуване и управление на обяви','Вградени съобщения между потребители','Плащания и/или комисионна логика','Модераторски панел за обяви и потребители','По избор: рейтинги и отзиви'] },
+  'Административен панел / CRM': { features:['Персонализирана вътрешна система по твоите процеси','Управление на клиенти, поръчки, служители или наличности','Роли и нива на достъп','Справки и статистики','Интеграция със съществуващия ти сайт или система'] },
+  'Автоматизации и API интеграции': { features:['Свързване между системи — напр. сайт ↔ счетоводен софтуер','Python / C# / Java автоматизации на повтарящи се задачи','REST/API интеграции с трети страни','Автоматични имейли и известия при определени събития'] },
+  'Telegram / Discord ботове': { features:['Персонализиран бот според нуждите ти','Автоматични отговори, команди и нотификации','Обработка на поръчки или заявки през бота','Инструменти за community management (за Discord)'] },
+  'AI интеграции': { features:['AI чатбот за сайта или продукта','Автоматизирано генериране на съдържание','AI логика, вградена в съществуващ работен процес','Интеграция с OpenAI или подобни API'] },
+  'SEO и техническа оптимизация': { features:['Техническа SEO проверка на сайта','Оптимизация на скоростта (Core Web Vitals)','Структурирани данни (schema.org) за Google','Настройка на sitemap.xml и robots.txt','Основни препоръки за съдържание'] },
+  'Поддръжка и хостинг': { features:['Хостинг менажиране','Редовни ъпдейти и проверки за сигурност','Мониторинг на ъптайм','Резервни копия (бекъпи)','Дребни промени и поправки по заявка'] },
+  'GDPR / Бисквитки и поверителност': { features:['Банер за съгласие с бисквитки','Политика за поверителност и условия за ползване','Технически преглед за GDPR съответствие','Категоризация на бисквитки — нужни / аналитични / маркетингови'] },
+  'Многоезичност': { features:['Добавяне на допълнителен(и) език(ци) към сайта','Превод на цялото съдържание','SEO настройки за всеки език','Превключвател на езици в интерфейса'] },
+  'Анализи и проследяване': { features:['Настройка на Google Analytics (GA4)','Проследяване на конверсии и цели','Базов dashboard с ключови показатели','Кратки насоки как да четеш данните'] },
+};
 const read = (key, fallback) => { try { const raw = localStorage.getItem(key); if (raw === null) return fallback; return JSON.parse(raw); } catch { return fallback; } };
 const parseLangs = (str) => (str||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>{const [name,pct]=x.split(':').map(v=>v.trim());const n=parseInt(pct,10);return name&&!isNaN(n)?{name,pct:Math.max(0,Math.min(100,n))}:null;}).filter(Boolean);
 const pageMeta = (page,t,settings) => {
@@ -197,25 +212,44 @@ function Skills({t}) {
     <div className="skills-groups">{groups.map(group=><section className="skill-group" key={group.number}><header><span>{group.number}</span><div><h2>{group.title}</h2><p>{group.subtitle}</p></div><code>// {group.items.length} tools</code></header><div className="skill-items">{group.items.map(i=><article key={tech[i]}><b className={`glyph g${i}${glyphs[i].length>=3?" glyph-wide":glyphs[i].length===2?" glyph-mid":""}`}>{glyphs[i]}</b><div><strong>{tech[i]}</strong><span>{group.title}</span></div><i>↗</i></article>)}</div></section>)}</div>
   </div></section>
 }
-function ServiceGrid({items,startIndex,bg}) {
-  return <div className="service-grid">{items.map((s,i)=><article key={s.id||i}><span>{String(startIndex+i+1).padStart(2,'0')}</span><i>✦</i><h3>{s.title}</h3><p>{s.desc}</p><div><div className="price-row">{s.oldPrice&&<s className="old-price">{s.oldPrice}</s>}<b>{s.price}</b></div><small>{bg?'индивидуална оферта':'tailored quote'}</small></div></article>)}</div>;
+function ServiceGrid({items,startIndex,bg,onDetails}) {
+  return <div className="service-grid">{items.map((s,i)=><article key={s.id||i}><span>{String(startIndex+i+1).padStart(2,'0')}</span><i>✦</i><h3>{s.title}</h3><p>{s.desc}</p><div><div className="price-row">{s.oldPrice&&<s className="old-price">{s.oldPrice}</s>}<b>{s.price}</b></div><div className="card-meta"><small>{bg?'индивидуална оферта':'tailored quote'}</small><button type="button" className="details-btn" onClick={()=>onDetails(s)}>{bg?'Виж детайли':'View details'} →</button></div></div></article>)}</div>;
+}
+
+function ServiceDetailModal({service,bg,onClose}) {
+  const details = serviceDetails[service.title];
+  return <div className="detail-backdrop" onClick={onClose}>
+    <div className="detail-modal" onClick={e=>e.stopPropagation()}>
+      <button type="button" className="close" onClick={onClose}>×</button>
+      <span className="section-tag">// {bg?'ДЕТАЙЛИ':'DETAILS'}</span>
+      <h3>{service.title}</h3>
+      <div className="price-row">{service.oldPrice&&<s className="old-price">{service.oldPrice}</s>}<b>{service.price}</b></div>
+      <p className="detail-desc">{service.desc}</p>
+      {details ? <>
+        <ul className="detail-features">{details.features.map((f,i)=><li key={i}>{f}</li>)}</ul>
+        {details.note && <p className="detail-note">{details.note}</p>}
+      </> : <p className="detail-fallback">{bg?'Обхватът за тази услуга се определя индивидуално — свържи се за детайли.':'Scope for this service is defined individually — get in touch for details.'}</p>}
+    </div>
+  </div>;
 }
 
 function Services({t,services}) {
   const bg = t.servicesTitle === 'Услуги';
+  const [activeDetail,setActiveDetail] = useState(null);
   const foundation = services.filter(s => (s.category||'addon') === 'foundation');
   const addons = services.filter(s => (s.category||'addon') !== 'foundation');
   return <section className="single-page services-page"><div className="wrap">
     <div className="services-heading"><span className="section-tag">// {bg?'УСЛУГИ':'SERVICES'}</span><h2>{bg?'Как мога да помогна.':'What I can help you build.'}</h2><p>{t.servicesIntro}</p></div>
     {!!foundation.length && <div className="services-group">
       <div className="services-group-head"><h3>{bg?'Основни пакети':'Core packages'}</h3><p>{bg?'Избираш едно от тези като основен продукт — те са различни нива, не се комбинират едно с друго.':'Pick one of these as your core product — different tiers, not meant to be combined.'}</p></div>
-      <ServiceGrid items={foundation} startIndex={0} bg={bg}/>
+      <ServiceGrid items={foundation} startIndex={0} bg={bg} onDetails={setActiveDetail}/>
     </div>}
     {!!addons.length && <div className="services-group">
       <div className="services-group-head"><h3>{bg?'Добавки':'Add-ons'}</h3><p>{bg?'Комбинират се свободно с всеки от пакетите по-горе.':'Combine freely with any package above.'}</p></div>
-      <ServiceGrid items={addons} startIndex={foundation.length} bg={bg}/>
+      <ServiceGrid items={addons} startIndex={foundation.length} bg={bg} onDetails={setActiveDetail}/>
     </div>}
     {!services.length&&<p className="admin-empty">{bg?'Няма добавени услуги.':'No services added yet.'}</p>}
+    {activeDetail && <ServiceDetailModal service={activeDetail} bg={bg} onClose={()=>setActiveDetail(null)}/>}
   </div></section>
 }
 function RocketField() {
