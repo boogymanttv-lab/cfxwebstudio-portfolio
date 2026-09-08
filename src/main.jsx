@@ -18,30 +18,54 @@ const initialProjects = [{title:'AI System Income',desc:'Инвестицион�
 const initialServices = [{title:'Бизнес уебсайт',desc:'Презентационен сайт за бизнес или личен бранд — модерен дизайн, бърза скорост и SEO основи.',price:'от €349',oldPrice:'от €499'},{title:'Онлайн магазин',desc:'Пълноценен e-commerce магазин с количка, плащания с карта, наложен платеж и админ панел за продукти и поръчки.',price:'от €899',oldPrice:'от €1400'},{title:'Full-stack SaaS платформа',desc:'Цялостна платформа с потребители, абонаменти, база данни и админ логика — от идея до production.',price:'от €1899',oldPrice:'от €2900'},{title:'Административен панел / CRM',desc:'Вътрешна система за управление на клиенти, поръчки, служители или наличности, скроена по твоите процеси.',price:'от €699',oldPrice:'от €1100'},{title:'Маркетплейс платформа',desc:'Платформа с много продавачи/потребители — обяви, съобщения, плащания и модерация, като Bazar.bg или OLX модел.',price:'от €1699',oldPrice:'от €2600'},{title:'Автоматизации и API интеграции',desc:'Python, C#, Java и REST/API интеграции между системи, които премахват ръчната и повтаряща се работа.',price:'от €249',oldPrice:'от €399'},{title:'Telegram / Discord ботове',desc:'Персонализирани ботове за автоматизация, нотификации, поръчки или community management.',price:'от €199',oldPrice:'от €329'},{title:'AI интеграции',desc:'Вграждане на AI чатботове, автоматизирано съдържание или AI логика в съществуващ продукт.',price:'от €349',oldPrice:'от €549'},{title:'Поддръжка и хостинг',desc:'Месечна поддръжка, ъпдейти, мониторинг и хостинг менажиране, за да работи всичко гладко след старта.',price:'от €69/мес',oldPrice:'от €99/мес'},{title:'SEO и техническа оптимизация',desc:'Оптимизация на скорост, структура и видимост в Google — за да те намират реалните клиенти.',price:'от €199',oldPrice:'от €299'}];
 const read = (key, fallback) => { try { const raw = localStorage.getItem(key); if (raw === null) return fallback; return JSON.parse(raw); } catch { return fallback; } };
 const parseLangs = (str) => (str||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>{const [name,pct]=x.split(':').map(v=>v.trim());const n=parseInt(pct,10);return name&&!isNaN(n)?{name,pct:Math.max(0,Math.min(100,n))}:null;}).filter(Boolean);
+const pageMeta = (page,t,settings) => {
+  const brand = settings.brand || 'cfxwebstudio';
+  const byPage = {
+    home: { title: brand + ' — Full Stack Developer', desc:t.intro },
+    about: { title: t.about + ' — ' + brand, desc:t.aboutText },
+    projects: { title: t.projects + ' — ' + brand, desc:t.projectsIntro },
+    skills: { title: t.skills + ' — ' + brand, desc:t.skillsIntro },
+    services: { title: t.servicesTitle + ' — ' + brand, desc:t.servicesIntro },
+    experience: { title: t.experience + ' — ' + brand, desc:t.experienceIntro },
+    contact: { title: t.contact + ' — ' + brand, desc:t.ctaText },
+  };
+  return byPage[page] || byPage.home;
+};
 
 function App() {
   const [lang,setLang] = useState('bg');
-  const initialHash = location.hash.replace('#/','') || 'home';
-  const [page,setPage] = useState(() => initialHash === 'admin' ? 'home' : initialHash);
+  const initialPath = location.pathname.replace(/^\//,'').replace(/\/$/,'') || 'home';
+  const [page,setPage] = useState(() => initialPath === 'admin' ? 'home' : initialPath);
   const [loaded,setLoaded] = useState(false);
   const [available,setAvailable] = useState(true);
   const [settings,setSettings] = useState(defaults);
   const [projects,setProjects] = useState(initialProjects);
   const [services,setServices] = useState(initialServices);
-  const [adminOpen,setAdminOpen] = useState(() => initialHash === 'admin');
+  const [adminOpen,setAdminOpen] = useState(() => initialPath === 'admin');
   const [sent,setSent] = useState(false);
   const [menuOpen,setMenuOpen] = useState(false);
   const [draft,setDraft] = useState({title:'',desc:'',tags:'',langs:'',image:'',website:'',github:''});
   const [draftService,setDraftService] = useState({title:'',desc:'',price:'',oldPrice:''});
   const t = copy[lang];
-  useEffect(() => { const change = () => { const h = location.hash.replace('#/','') || 'home'; if (h === 'admin') { setAdminOpen(true); } else { setPage(h); setAdminOpen(false); } }; addEventListener('hashchange',change); return () => removeEventListener('hashchange',change); },[]);
+  useEffect(() => { const change = () => { const p = location.pathname.replace(/^\//,'').replace(/\/$/,'') || 'home'; if (p === 'admin') { setAdminOpen(true); } else { setPage(p); setAdminOpen(false); } }; addEventListener('popstate',change); return () => removeEventListener('popstate',change); },[]);
   useEffect(() => { (async () => { const site = await loadSite(defaults,initialProjects,initialServices); setSettings(site.settings); setAvailable(site.available); setProjects(site.projects); setServices(site.services); setLoaded(true); })(); },[]);
   useEffect(() => { if (!remoteEnabled && loaded) localStorage.setItem('cfx-settings',JSON.stringify(settings)); },[settings]);
   useEffect(() => { if (!remoteEnabled && loaded) localStorage.setItem('cfx-projects',JSON.stringify(projects)); },[projects]);
   useEffect(() => { if (!remoteEnabled && loaded) localStorage.setItem('cfx-services',JSON.stringify(services)); },[services]);
   useEffect(() => { if (!remoteEnabled && loaded) localStorage.setItem('cfx-available',JSON.stringify(available)); },[available]);
   useEffect(() => setMenuOpen(false),[page]);
-  const navigate = target => { location.hash = `/${target}`; window.scrollTo({top:0,behavior:'smooth'}); };
+  useEffect(() => {
+    const meta = pageMeta(page,t,settings);
+    document.title = meta.title;
+    const setMeta = (selector, attr, value) => { const el = document.querySelector(selector); if (el) el.setAttribute(attr,value); };
+    setMeta('meta[name="description"]','content',meta.desc);
+    setMeta('meta[property="og:title"]','content',meta.title);
+    setMeta('meta[property="og:description"]','content',meta.desc);
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement('link'); canonical.setAttribute('rel','canonical'); document.head.appendChild(canonical); }
+    canonical.setAttribute('href', 'https://' + settings.domain + location.pathname);
+  },[page,lang,settings.brand,settings.domain]);
+  const navigate = target => { const path = target === 'home' ? '/' : `/${target}`; if (location.pathname !== path) history.pushState({}, '', path); setPage(target); setAdminOpen(false); window.scrollTo({top:0,behavior:'smooth'}); };
   const readFile = async (file, done) => { if (!file) return; if (remoteEnabled) { const res = await uploadImageRemote(file); if (res && res.ok) done(res.url); else alert('Качването на снимката не успя. Опитай пак.'); return; } const r = new FileReader(); r.onload = () => done(r.result); r.readAsDataURL(file); };
   const submitProject = async e => { e.preventDefault(); if (!draft.title.trim()) return; const tone = ['violet','green','blue'][projects.length%3]; const saved = await addProjectRemote({...draft,tone}); if (saved) setProjects([...projects,saved]); setDraft({title:'',desc:'',tags:'',langs:'',image:'',website:'',github:''}); };
   const updateProject = (key,field,value) => setProjects(projects.map((p,i) => (remoteEnabled?p.id===key:i===key) ? {...p,[field]:value} : p));
@@ -49,7 +73,7 @@ function App() {
   const submitService = async e => { e.preventDefault(); if (!draftService.title.trim()) return; const saved = await addServiceRemote({...draftService}); if (saved) setServices([...services,saved]); setDraftService({title:'',desc:'',price:'',oldPrice:''}); };
   const updateService = (key,field,value) => setServices(services.map((sv,i) => (remoteEnabled?sv.id===key:i===key) ? {...sv,[field]:value} : sv));
   const removeService = async key => { if (remoteEnabled) { await deleteServiceRemote(key); setServices(services.filter(sv=>sv.id!==key)); } else { setServices(services.filter((_,i)=>i!==key)); } };
-  const closeAdmin = () => { setAdminOpen(false); if (location.hash.replace('#/','') === 'admin') location.hash = `/${page}`; };
+  const closeAdmin = () => { setAdminOpen(false); if (location.pathname === '/admin') { const path = page === 'home' ? '/' : `/${page}`; history.pushState({}, '', path); } };
   const title = page === 'home' ? null : ({about:t.about,projects:t.projects,skills:t.skills,services:t.servicesTitle,experience:t.experience,contact:t.contact}[page]);
   return <>
     <header><nav className="wrap"><button className="logo" onClick={() => navigate('home')}>{settings.logo?<img src={settings.logo} alt={settings.brand}/>:<span>&lt;/&gt;</span>}<b>{settings.brand}</b></button><div className="nav-links desktop-only">{t.nav.map(([key,label]) => <button key={key} className={page===key?'active':''} onClick={() => navigate(key)}>{label}</button>)}</div><div className="nav-actions"><div className="lang-toggle"><button className={lang==='bg'?'active':''} onClick={() => setLang('bg')}>BG</button><button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button></div><button className="btn primary small hide-mobile" onClick={() => navigate('contact')}>{t.contact} ↗</button><button className={`menu-toggle${menuOpen?' open':''}`} aria-label="Menu" onClick={() => setMenuOpen(o=>!o)}><i></i><i></i><i></i></button></div></nav>{menuOpen&&<div className="nav-drawer"><div className="nav-drawer-links">{t.nav.map(([key,label]) => <button key={key} className={page===key?'active':''} onClick={() => navigate(key)}>{label}</button>)}</div><button className="btn primary" onClick={() => navigate('contact')}>{t.contact} ↗</button></div>}</header>
