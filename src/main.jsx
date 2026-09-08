@@ -190,7 +190,7 @@ function FlappyGame({bg}) {
     let frame = 0;
     let raf;
     let localScore = 0;
-    const gap = 110, pipeW = 34, gravity = 0.38, flapPower = -6.6;
+    const gap = 155, pipeW = 30, gravity = 0.26, flapPower = -6.2;
     const reset = () => { bird = { x:50, y:H/2, vy:0 }; pipes = []; frame = 0; localScore = 0; setScore(0); };
     const flap = () => { if (stateRef.current === 'playing') bird.vy = flapPower; };
     flapRef.current = flap;
@@ -198,8 +198,8 @@ function FlappyGame({bg}) {
       if (stateRef.current === 'playing') {
         frame++;
         bird.vy += gravity; bird.y += bird.vy;
-        if (frame % 95 === 0) { const gy = 30 + Math.random()*(H-gap-60); pipes.push({ x: W, gy }); }
-        pipes.forEach(p => p.x -= 2.6);
+        if (frame % 130 === 0) { const gy = 30 + Math.random()*(H-gap-60); pipes.push({ x: W, gy }); }
+        pipes.forEach(p => p.x -= 1.8);
         pipes = pipes.filter(p => p.x > -pipeW);
         pipes.forEach(p => { if (!p.passed && p.x + pipeW < bird.x) { p.passed = true; localScore++; setScore(localScore); } });
         const hitGround = bird.y > H - 14 || bird.y < 0;
@@ -246,15 +246,15 @@ function DodgeGame({bg}) {
     const W = canvas.width, H = canvas.height;
     let ship = { x: W/2 };
     let rocks = [];
-    let frame = 0, speed = 2.2, raf, localScore = 0;
-    const reset = () => { ship = { x: W/2 }; rocks = []; frame = 0; speed = 2.2; localScore = 0; setScore(0); };
+    let frame = 0, speed = 1.4, raf, localScore = 0;
+    const reset = () => { ship = { x: W/2 }; rocks = []; frame = 0; speed = 1.4; localScore = 0; setScore(0); };
     const loop = () => {
       if (stateRef.current === 'playing') {
         frame++; localScore++; if (frame % 30 === 0) setScore(Math.floor(localScore/10));
         if (keysRef.current.left) ship.x -= 4.2; if (keysRef.current.right) ship.x += 4.2;
         ship.x = Math.max(12, Math.min(W-12, ship.x));
-        if (frame % 26 === 0) rocks.push({ x: 10+Math.random()*(W-20), y:-10, r: 8+Math.random()*8 });
-        speed += 0.0015;
+        if (frame % 42 === 0) rocks.push({ x: 10+Math.random()*(W-20), y:-10, r: 7+Math.random()*6 });
+        speed += 0.0007;
         rocks.forEach(r => r.y += speed*2);
         rocks = rocks.filter(r => r.y < H+20);
         const hit = rocks.some(r => Math.hypot(r.x-ship.x, r.y-(H-16)) < r.r+9);
@@ -296,7 +296,7 @@ function InteractiveDesk({bg}) {
     build: bg?'✓ компилиране... готово за 0.8s':'✓ building... done in 0.8s',
     deploy: bg?'🚀 качено на production':'🚀 shipped to production',
     coffee: '☕ brewing...',
-    ai: bg?'AI пише кода, аз му давам идеи 🙂':'AI writes the code, I bring the ideas 🙂',
+    ai: bg?'AI е добър, но не може да ме замени.':"AI is good, but it can't replace me.",
     rocket: bg?'towards the moon 🌕':'towards the moon 🌕',
     whoami: bg?'разработчик, който си играе твърде много':'a developer who plays around too much',
   };
