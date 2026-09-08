@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
-import { remoteEnabled, loadSite, saveSettings, saveProjectsRemote, saveServicesRemote, addProjectRemote, deleteProjectRemote, addServiceRemote, deleteServiceRemote, signIn, signOutRemote, getSession, onAuthChange } from './store.js';
+import { remoteEnabled, loadSite, saveSettings, saveProjectsRemote, saveServicesRemote, addProjectRemote, deleteProjectRemote, addServiceRemote, deleteServiceRemote, uploadImageRemote, signIn, signOutRemote, getSession, onAuthChange } from './store.js';
 
 const copy = {
   bg: { nav:[['home','Начало'],['about','За мен'],['projects','Проекти'],['skills','Умения'],['services','Услуги'],['experience','Опит'],['contact','Контакти']], hello:'Здравей, аз съм', role:'Full Stack Developer', intro:'Създавам модерни, бързи и сигурни уеб приложения — от първата идея до production.', work:'Виж проектите ми', contact:'Свържи се с мен', available:'За нови проекти', busy:'В момента съм зает', about:'За мен', aboutText:'Full Stack разработчик с фокус върху ясна архитектура, добър UX и продукти, които решават реални проблеми.', stack:'Технологии, с които работя', projects:'Проекти', projectsIntro:'Подбрани продукти, интерфейси и автоматизации, изградени за реална употреба.', skills:'Умения и услуги', skillsIntro:'Целият stack, с който превръщам идеи в работещи продукти.', experience:'Опит', experienceIntro:'Практически опит с продукти, клиенти и full-stack системи.', cta:'Имаш проект в ума си?', ctaText:'Нека го обсъдим и да създадем нещо страхотно заедно.', send:'Изпрати запитване', sent:'Изпратено!', admin:'Admin', save:'Запази промените', add:'Добави проект', homeBlurb:'Създавам продукти, които са бързи, ясни и готови да растат.', servicesTitle:'Услуги', servicesIntro:'От малък уебсайт до цялостна платформа — подбираме правилния stack според целта.' },
@@ -42,7 +42,7 @@ function App() {
   useEffect(() => { if (!remoteEnabled && loaded) localStorage.setItem('cfx-available',JSON.stringify(available)); },[available]);
   useEffect(() => setMenuOpen(false),[page]);
   const navigate = target => { location.hash = `/${target}`; window.scrollTo({top:0,behavior:'smooth'}); };
-  const readFile = (file, done) => { if (!file) return; const r = new FileReader(); r.onload = () => done(r.result); r.readAsDataURL(file); };
+  const readFile = async (file, done) => { if (!file) return; if (remoteEnabled) { const res = await uploadImageRemote(file); if (res && res.ok) done(res.url); else alert('Качването на снимката не успя. Опитай пак.'); return; } const r = new FileReader(); r.onload = () => done(r.result); r.readAsDataURL(file); };
   const submitProject = async e => { e.preventDefault(); if (!draft.title.trim()) return; const tone = ['violet','green','blue'][projects.length%3]; const saved = await addProjectRemote({...draft,tone}); if (saved) setProjects([...projects,saved]); setDraft({title:'',desc:'',tags:'',langs:'',image:'',website:'',github:''}); };
   const updateProject = (key,field,value) => setProjects(projects.map((p,i) => (remoteEnabled?p.id===key:i===key) ? {...p,[field]:value} : p));
   const removeProject = async key => { if (remoteEnabled) { await deleteProjectRemote(key); setProjects(projects.filter(p=>p.id!==key)); } else { setProjects(projects.filter((_,i)=>i!==key)); } };

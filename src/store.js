@@ -87,6 +87,16 @@ export async function deleteServiceRemote(id) {
   return !error;
 }
 
+export async function uploadImageRemote(file) {
+  if (!supabase) return null;
+  const ext = (file.name && file.name.includes('.')) ? file.name.split('.').pop() : 'jpg';
+  const path = uid() + '.' + ext;
+  const { error } = await supabase.storage.from('portfolio-images').upload(path, file, { cacheControl: '3600', upsert: false });
+  if (error) return { ok: false, error: error.message };
+  const { data } = supabase.storage.from('portfolio-images').getPublicUrl(path);
+  return { ok: true, url: data.publicUrl };
+}
+
 export async function signIn(email, password) {
   if (!supabase) return { ok: false, error: 'Supabase не е конфигуриран.' };
   const { error } = await supabase.auth.signInWithPassword({ email, password });
