@@ -32,6 +32,47 @@ const pageMeta = (page,t,settings) => {
   return byPage[page] || byPage.home;
 };
 
+function MatrixRain() {
+  const canvasRef = React.useRef(null);
+  React.useEffect(() => {
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+    const fontSize = 15;
+    let columns = Math.max(1, Math.floor(w / fontSize));
+    let drops = Array(columns).fill(0).map(() => Math.random() * -40);
+    const chars = 'アイウエオカキクケコサシスセソ0123456789<>{}[]/=+-*;:';
+    const colors = ['#8b5cf6','#5eead4','#60a5fa','#c7bcff'];
+    let raf, last = 0;
+    const draw = () => {
+      ctx.fillStyle = 'rgba(6,9,18,0.08)';
+      ctx.fillRect(0,0,w,h);
+      ctx.font = fontSize + 'px monospace';
+      for (let i=0;i<drops.length;i++) {
+        const ch = chars[Math.floor(Math.random()*chars.length)];
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.globalAlpha = 0.5;
+        ctx.fillText(ch, i*fontSize, drops[i]*fontSize);
+        ctx.globalAlpha = 1;
+        if (drops[i]*fontSize > h && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    };
+    const loop = t => { if (t - last > 65) { draw(); last = t; } raf = requestAnimationFrame(loop); };
+    raf = requestAnimationFrame(loop);
+    const onResize = () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      columns = Math.max(1, Math.floor(w / fontSize));
+      drops = Array(columns).fill(0).map(() => Math.random() * -40);
+    };
+    window.addEventListener('resize', onResize);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
+  }, []);
+  return <canvas ref={canvasRef} className="matrix-rain" aria-hidden="true"></canvas>;
+}
+
 function App() {
   const [lang,setLang] = useState('bg');
   const initialPath = location.pathname.replace(/^\//,'').replace(/\/$/,'') || 'home';
@@ -76,10 +117,13 @@ function App() {
   const closeAdmin = () => { setAdminOpen(false); if (location.pathname === '/admin') { const path = page === 'home' ? '/' : `/${page}`; history.pushState({}, '', path); } };
   const title = page === 'home' ? null : ({about:t.about,projects:t.projects,skills:t.skills,services:t.servicesTitle,experience:t.experience,contact:t.contact}[page]);
   return <>
+    <MatrixRain/>
+    <div className="site-shell">
     <header><nav className="wrap"><button className="logo" onClick={() => navigate('home')}>{settings.logo?<img src={settings.logo} alt={settings.brand}/>:<span>&lt;/&gt;</span>}<b>{settings.brand}</b></button><div className="nav-links desktop-only">{t.nav.map(([key,label]) => <button key={key} className={page===key?'active':''} onClick={() => navigate(key)}>{label}</button>)}</div><div className="nav-actions"><div className="lang-toggle"><button className={lang==='bg'?'active':''} onClick={() => setLang('bg')}>BG</button><button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button></div><button className="btn primary small hide-mobile" onClick={() => navigate('contact')}>{t.contact} ↗</button><button className={`menu-toggle${menuOpen?' open':''}`} aria-label="Menu" onClick={() => setMenuOpen(o=>!o)}><i></i><i></i><i></i></button></div></nav>{menuOpen&&<div className="nav-drawer"><div className="nav-drawer-links">{t.nav.map(([key,label]) => <button key={key} className={page===key?'active':''} onClick={() => navigate(key)}>{label}</button>)}</div><button className="btn primary" onClick={() => navigate('contact')}>{t.contact} ↗</button></div>}</header>
     <main>{title && <section className="page-head"><div className="wrap"><span>{settings.domain}</span><h1>{title}</h1></div></section>}{page==='home'&&<Home t={t} settings={settings} available={available} navigate={navigate}/>} {page==='about'&&<About t={t} settings={settings} available={available}/>} {page==='projects'&&<Projects t={t} projects={projects}/>} {page==='skills'&&<Skills t={t}/>} {page==='services'&&<Services t={t} services={services}/>} {page==='experience'&&<Experience t={t} settings={settings}/>} {page==='contact'&&<Contact t={t} settings={settings} available={available} sent={sent} setSent={setSent}/>}</main>
     <footer><div className="wrap"><span>© {new Date().getFullYear()} {settings.brand}. {lang==='bg'?'Всички права запазени.':'All rights reserved.'}</span><span>{settings.domain}</span><span>GitHub ↗　LinkedIn ↗</span></div></footer>
-    {adminOpen&&<Admin t={t} settings={settings} setSettings={setSettings} available={available} setAvailable={setAvailable} projects={projects} updateProject={updateProject} removeProject={removeProject} draft={draft} setDraft={setDraft} readFile={readFile} submitProject={submitProject} services={services} updateService={updateService} removeService={removeService} draftService={draftService} setDraftService={setDraftService} submitService={submitService} close={closeAdmin}/>} 
+    {adminOpen&&<Admin t={t} settings={settings} setSettings={setSettings} available={available} setAvailable={setAvailable} projects={projects} updateProject={updateProject} removeProject={removeProject} draft={draft} setDraft={setDraft} readFile={readFile} submitProject={submitProject} services={services} updateService={updateService} removeService={removeService} draftService={draftService} setDraftService={setDraftService} submitService={submitService} close={closeAdmin}/>}
+    </div>
   </>;
 }
 
@@ -185,11 +229,24 @@ function InteractiveDesk({bg}) {
     rocket: bg?'towards the moon 🌕':'towards the moon 🌕',
     whoami: bg?'разработчик, който си играе твърде много':'a developer who plays around too much',
     sudo: bg?'хубав опит 😏 нямаш root достъп тук':"nice try 😏 you don't have root here",
-    joke: bg?'защо програмистите бъркат Halloween с Коледа? Защото Oct 31 == Dec 25.':'why do programmers confuse Halloween with Christmas? Because Oct 31 == Dec 25.',
   };
+  const jokes = bg ? [
+    'защо програмистите бъркат Halloween с Коледа? Защото Oct 31 == Dec 25.',
+    'има 10 вида хора — тези, които разбират двоичната бройна система, и тези, които не.',
+    'работи на моята машина 🤷',
+    '99 малки бъга в кода... поправяш един, стават 127.',
+    'защо програмистът фалира? защото използваше своя стек грешно.',
+  ] : [
+    'why do programmers confuse Halloween with Christmas? Because Oct 31 == Dec 25.',
+    "there are 10 kinds of people — those who understand binary and those who don't.",
+    'works on my machine 🤷',
+    '99 little bugs in the code... fix one, 127 remain.',
+    'why did the developer go broke? he used up all his cache.',
+  ];
   const run = cmd => {
     const c = cmd.trim().toLowerCase();
     if (c === 'clear') { setLines([]); return; }
+    if (c === 'joke') { setLines(prev => [...prev.slice(-8), `$ ${cmd}`, jokes[Math.floor(Math.random()*jokes.length)]]); return; }
     const out = responses[c] || (c ? (bg?`команда не е намерена: ${c}`:`command not found: ${c}`) : '');
     setLines(prev => [...prev.slice(-8), `$ ${cmd}`, out].filter(Boolean));
   };
@@ -218,6 +275,41 @@ function InteractiveDesk({bg}) {
   </div>;
 }
 
+function LiveCodeMonitor({bg}) {
+  const snippets = React.useMemo(() => [
+    '<h1>Hello World</h1>',
+    'const handleClick = () => setOpen(true);',
+    'function App(){ return <Home/> }',
+    'app.get("/api/users", getUsers);',
+    'const { data } = await supabase.from("orders").select();',
+    'export default function Product(){ ... }',
+    'ai.pair(me).build(faster);',
+    'git commit -m "ship it"',
+  ], []);
+  const [completed,setCompleted] = React.useState([]);
+  const [current,setCurrent] = React.useState('');
+  const stateRef = React.useRef({snipIndex:0, charIndex:0});
+  React.useEffect(() => {
+    const id = setInterval(() => {
+      const st = stateRef.current;
+      const snip = snippets[st.snipIndex % snippets.length];
+      st.charIndex++;
+      setCurrent(snip.slice(0, st.charIndex));
+      if (st.charIndex >= snip.length) {
+        setCompleted(prev => { const next = [...prev, snip]; return next.length > 13 ? next.slice(-13) : next; });
+        setCurrent('');
+        st.snipIndex++;
+        st.charIndex = -8;
+      }
+    }, 38);
+    return () => clearInterval(id);
+  }, [snippets]);
+  return <div className="mini-monitor journey-monitor">
+    <div className="screen-top"><i></i><i></i><i></i><b>build.log</b><small>● {bg?'на линия':'online'}</small></div>
+    <pre className="desk-screen journey-screen">{completed.map((l,i)=><span key={i}>{'> '}{l}{`\n`}</span>)}{current&&<span>{'> '}{current}<b className="caret">▌</b></span>}</pre>
+  </div>;
+}
+
 function Experience({t,settings}) {
   const bg = t.experience === 'Опит';
   const stats = bg ? [['10+','години опит'],['40+','завършени проекта'],['20+','доволни клиента']] : [['10+','years experience'],['40+','projects delivered'],['20+','happy clients']];
@@ -240,7 +332,10 @@ function Experience({t,settings}) {
     <RocketField/>
     <div className="wrap experience-wrap">
       <div className="portfolio-top"><p className="page-intro">{t.experienceIntro}</p><div className="portfolio-stats">{stats.map(([value,label])=><span key={label}><b>{value}</b>{label}</span>)}</div></div>
-      <div className="journey-steps">{journey.map(([num,title,desc],i)=><div className={`journey-step js-${i%2}`} key={num}><span className="step-num">{num}</span><h3>{title}</h3><p>{desc}</p></div>)}</div>
+      <div className="journey-layout">
+        <div className="journey-steps">{journey.map(([num,title,desc])=><div className="journey-step" key={num}><span className="step-num">{num}</span><h3>{title}</h3><p>{desc}</p></div>)}</div>
+        <LiveCodeMonitor bg={bg}/>
+      </div>
       <div className="playground">
         <div className="playground-head"><span className="section-tag">// PLAYGROUND</span><h2>{bg?'Малко забавление между редовете код':'A little fun between the lines of code'}</h2><p className="playground-note">{bg?'Този терминал — е построен директно в браузъра, от нас. Пиши свободно.':'This terminal — was built right in the browser, by us. Type away.'}</p></div>
         <InteractiveDesk bg={bg}/>
