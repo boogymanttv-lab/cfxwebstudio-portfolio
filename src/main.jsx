@@ -173,137 +173,25 @@ function RocketField() {
   return <div className="rocket-field" aria-hidden="true">{rockets.map(r => <span key={r.id} className={`rocket rocket-${r.dir}`} style={{top:`${r.top}%`,fontSize:`${r.size}px`,animationDuration:`${r.dur}s`,animationDelay:`${r.delay}s`}}>🚀</span>)}</div>;
 }
 
-function FlappyGame({bg}) {
-  const canvasRef = React.useRef(null);
-  const [score,setScore] = React.useState(0);
-  const [best,setBest] = React.useState(0);
-  const [state,setState] = React.useState('idle');
-  const stateRef = React.useRef('idle');
-  React.useEffect(() => { stateRef.current = state; }, [state]);
-  const flapRef = React.useRef(false);
-  React.useEffect(() => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    let bird = { x: 50, y: H/2, vy: 0 };
-    let pipes = [];
-    let frame = 0;
-    let raf;
-    let localScore = 0;
-    const gap = 155, pipeW = 30, gravity = 0.26, flapPower = -6.2;
-    const reset = () => { bird = { x:50, y:H/2, vy:0 }; pipes = []; frame = 0; localScore = 0; setScore(0); };
-    const flap = () => { if (stateRef.current === 'playing') bird.vy = flapPower; };
-    flapRef.current = flap;
-    const loop = () => {
-      if (stateRef.current === 'playing') {
-        frame++;
-        bird.vy += gravity; bird.y += bird.vy;
-        if (frame % 130 === 0) { const gy = 30 + Math.random()*(H-gap-60); pipes.push({ x: W, gy }); }
-        pipes.forEach(p => p.x -= 1.8);
-        pipes = pipes.filter(p => p.x > -pipeW);
-        pipes.forEach(p => { if (!p.passed && p.x + pipeW < bird.x) { p.passed = true; localScore++; setScore(localScore); } });
-        const hitGround = bird.y > H - 14 || bird.y < 0;
-        const hitPipe = pipes.some(p => bird.x + 9 > p.x && bird.x - 9 < p.x + pipeW && (bird.y - 9 < p.gy || bird.y + 9 > p.gy + gap));
-        if (hitGround || hitPipe) { setState('over'); setBest(b => Math.max(b, localScore)); }
-      }
-      ctx.clearRect(0,0,W,H);
-      ctx.fillStyle = '#0b0f1c'; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = '#8b5cf6';
-      pipes.forEach(p => { ctx.fillRect(p.x,0,pipeW,p.gy); ctx.fillRect(p.x,p.gy+gap,pipeW,H-p.gy-gap); });
-      ctx.fillStyle = '#c7bcff'; ctx.beginPath(); ctx.arc(bird.x,bird.y,9,0,Math.PI*2); ctx.fill();
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    const onKey = e => { if (e.code === 'Space') { e.preventDefault(); if (stateRef.current==='playing') flap(); } };
-    const onClick = () => { if (stateRef.current==='playing') flap(); };
-    canvas.addEventListener('mousedown', onClick);
-    canvas.addEventListener('touchstart', onClick);
-    window.addEventListener('keydown', onKey);
-    canvas.dataset.reset = '1';
-    canvas._reset = reset;
-    return () => { cancelAnimationFrame(raf); canvas.removeEventListener('mousedown', onClick); canvas.removeEventListener('touchstart', onClick); window.removeEventListener('keydown', onKey); };
-  }, []);
-  const start = () => { canvasRef.current?._reset?.(); setState('playing'); };
-  return <div className="game-card">
-    <div className="game-head"><b>Flappy Rocket</b><span>{bg?'Точки':'Score'}: {score} · {bg?'Рекорд':'Best'}: {best}</span></div>
-    <canvas ref={canvasRef} width={280} height={220} onClick={() => state!=='playing' && start()}></canvas>
-    {state!=='playing' && <button type="button" className="btn primary small" onClick={start}>{state==='over' ? (bg?'Пак':'Retry') : (bg?'Старт':'Start')}</button>}
-    <small className="game-hint">{bg?'Клик / Space за летене':'Click / Space to flap'}</small>
-  </div>;
-}
-
-function DodgeGame({bg}) {
-  const canvasRef = React.useRef(null);
-  const [score,setScore] = React.useState(0);
-  const [best,setBest] = React.useState(0);
-  const [state,setState] = React.useState('idle');
-  const stateRef = React.useRef('idle');
-  React.useEffect(() => { stateRef.current = state; }, [state]);
-  const keysRef = React.useRef({});
-  React.useEffect(() => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    let ship = { x: W/2 };
-    let rocks = [];
-    let frame = 0, speed = 1.4, raf, localScore = 0;
-    const reset = () => { ship = { x: W/2 }; rocks = []; frame = 0; speed = 1.4; localScore = 0; setScore(0); };
-    const loop = () => {
-      if (stateRef.current === 'playing') {
-        frame++; localScore++; if (frame % 30 === 0) setScore(Math.floor(localScore/10));
-        if (keysRef.current.left) ship.x -= 4.2; if (keysRef.current.right) ship.x += 4.2;
-        ship.x = Math.max(12, Math.min(W-12, ship.x));
-        if (frame % 42 === 0) rocks.push({ x: 10+Math.random()*(W-20), y:-10, r: 7+Math.random()*6 });
-        speed += 0.0007;
-        rocks.forEach(r => r.y += speed*2);
-        rocks = rocks.filter(r => r.y < H+20);
-        const hit = rocks.some(r => Math.hypot(r.x-ship.x, r.y-(H-16)) < r.r+9);
-        if (hit) { setState('over'); setBest(b => Math.max(b, Math.floor(localScore/10))); }
-      }
-      ctx.clearRect(0,0,W,H);
-      ctx.fillStyle = '#0b0f1c'; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = '#5eead4';
-      rocks.forEach(r => { ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,Math.PI*2); ctx.fill(); });
-      ctx.fillStyle = '#c7bcff'; ctx.font = '16px monospace'; ctx.fillText('🚀', ship.x-9, H-8);
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    const onDown = e => { if (e.key==='ArrowLeft'||e.key==='a') keysRef.current.left = true; if (e.key==='ArrowRight'||e.key==='d') keysRef.current.right = true; };
-    const onUp = e => { if (e.key==='ArrowLeft'||e.key==='a') keysRef.current.left = false; if (e.key==='ArrowRight'||e.key==='d') keysRef.current.right = false; };
-    window.addEventListener('keydown', onDown); window.addEventListener('keyup', onUp);
-    canvas._reset = reset;
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('keydown', onDown); window.removeEventListener('keyup', onUp); };
-  }, []);
-  const start = () => { canvasRef.current?._reset?.(); setState('playing'); };
-  const press = (dir,v) => { keysRef.current[dir] = v; };
-  return <div className="game-card">
-    <div className="game-head"><b>Rocket Dodge</b><span>{bg?'Точки':'Score'}: {score} · {bg?'Рекорд':'Best'}: {best}</span></div>
-    <canvas ref={canvasRef} width={280} height={220}></canvas>
-    {state!=='playing' && <button type="button" className="btn primary small" onClick={start}>{state==='over' ? (bg?'Пак':'Retry') : (bg?'Старт':'Start')}</button>}
-    <div className="game-touch">
-      <button type="button" onMouseDown={()=>press('left',true)} onMouseUp={()=>press('left',false)} onMouseLeave={()=>press('left',false)} onTouchStart={()=>press('left',true)} onTouchEnd={()=>press('left',false)}>◀</button>
-      <button type="button" onMouseDown={()=>press('right',true)} onMouseUp={()=>press('right',false)} onMouseLeave={()=>press('right',false)} onTouchStart={()=>press('right',true)} onTouchEnd={()=>press('right',false)}>▶</button>
-    </div>
-    <small className="game-hint">{bg?'Стрелки / бутони за движение':'Arrow keys / buttons to move'}</small>
-  </div>;
-}
-
 function InteractiveDesk({bg}) {
   const [lines,setLines] = React.useState([bg?'добре дошъл в терминала — напиши "help"':'welcome to the terminal — type "help"']);
   const [buf,setBuf] = React.useState('');
   const responses = {
-    help: bg?'налични: build, deploy, coffee, ai, rocket, whoami':'available: build, deploy, coffee, ai, rocket, whoami',
+    help: bg?'налични: build, deploy, coffee, ai, rocket, whoami, sudo, joke, clear':'available: build, deploy, coffee, ai, rocket, whoami, sudo, joke, clear',
     build: bg?'✓ компилиране... готово за 0.8s':'✓ building... done in 0.8s',
     deploy: bg?'🚀 качено на production':'🚀 shipped to production',
     coffee: '☕ brewing...',
     ai: bg?'AI е добър, но не може да ме замени.':"AI is good, but it can't replace me.",
     rocket: bg?'towards the moon 🌕':'towards the moon 🌕',
     whoami: bg?'разработчик, който си играе твърде много':'a developer who plays around too much',
+    sudo: bg?'хубав опит 😏 нямаш root достъп тук':"nice try 😏 you don't have root here",
+    joke: bg?'защо програмистите бъркат Halloween с Коледа? Защото Oct 31 == Dec 25.':'why do programmers confuse Halloween with Christmas? Because Oct 31 == Dec 25.',
   };
   const run = cmd => {
     const c = cmd.trim().toLowerCase();
+    if (c === 'clear') { setLines([]); return; }
     const out = responses[c] || (c ? (bg?`команда не е намерена: ${c}`:`command not found: ${c}`) : '');
-    setLines(prev => [...prev.slice(-6), `$ ${cmd}`, out].filter(Boolean));
+    setLines(prev => [...prev.slice(-8), `$ ${cmd}`, out].filter(Boolean));
   };
   const press = key => {
     if (key === 'enter') { run(buf); setBuf(''); return; }
@@ -354,8 +242,7 @@ function Experience({t,settings}) {
       <div className="portfolio-top"><p className="page-intro">{t.experienceIntro}</p><div className="portfolio-stats">{stats.map(([value,label])=><span key={label}><b>{value}</b>{label}</span>)}</div></div>
       <div className="journey-steps">{journey.map(([num,title,desc],i)=><div className={`journey-step js-${i%2}`} key={num}><span className="step-num">{num}</span><h3>{title}</h3><p>{desc}</p></div>)}</div>
       <div className="playground">
-        <div className="playground-head"><span className="section-tag">// PLAYGROUND</span><h2>{bg?'Малко забавление между редовете код':'A little fun between the lines of code'}</h2><p className="playground-note">{bg?'Тази секция — включително игрите — е построена директно в браузъра, от нас.':'This whole section — games included — was built right in the browser, by us.'}</p></div>
-        <div className="games-grid"><FlappyGame bg={bg}/><DodgeGame bg={bg}/></div>
+        <div className="playground-head"><span className="section-tag">// PLAYGROUND</span><h2>{bg?'Малко забавление между редовете код':'A little fun between the lines of code'}</h2><p className="playground-note">{bg?'Този терминал — е построен директно в браузъра, от нас. Пиши свободно.':'This terminal — was built right in the browser, by us. Type away.'}</p></div>
         <InteractiveDesk bg={bg}/>
       </div>
     </div>
