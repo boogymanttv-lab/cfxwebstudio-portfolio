@@ -1,0 +1,23 @@
+{
+  "name": "cfxwebstudio-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "cfxwebstudio \u2014 full-stack digital studio portfolio",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.2.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "@supabase/supabase-js": "^2.45.4"
+  },
+  "devDependencies": {}
+}
