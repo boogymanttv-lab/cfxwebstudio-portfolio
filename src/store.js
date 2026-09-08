@@ -9,8 +9,8 @@ export const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date
 
 const projectFromDb = r => ({ id:r.id, title:r.title, desc:r.description, tags:r.tags, langs:r.langs, tone:r.tone, image:r.image, website:r.website, github:r.github });
 const projectToDb = p => ({ id:p.id, title:p.title, description:p.desc, tags:p.tags, langs:p.langs, tone:p.tone, image:p.image, website:p.website, github:p.github });
-const serviceFromDb = r => ({ id:r.id, title:r.title, desc:r.description, price:r.price, oldPrice:r.old_price });
-const serviceToDb = s => ({ id:s.id, title:s.title, description:s.desc, price:s.price, old_price:s.oldPrice });
+const serviceFromDb = r => ({ id:r.id, title:r.title, desc:r.description, price:r.price, oldPrice:r.old_price, category:r.category || 'addon' });
+const serviceToDb = s => ({ id:s.id, title:s.title, description:s.desc, price:s.price, old_price:s.oldPrice, category:s.category || 'addon' });
 
 export async function loadSite(defaults, initialProjects, initialServices) {
   if (!supabase) {
