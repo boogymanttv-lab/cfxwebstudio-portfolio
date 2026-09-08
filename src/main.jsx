@@ -9,7 +9,7 @@ const copy = {
 };
 const tech = ['Next.js','TypeScript','JavaScript','React','Node.js','Python','C#','Java','PHP','Go','Ruby','HTML5','CSS3','Tailwind CSS','PostgreSQL','MySQL','MongoDB','Redis','Supabase','Docker','Git','AWS'];
 const glyphs = ['N','TS','JS','⚛','⬡','Py','C#','J','PHP','Go','Rb','H','CSS','≈','◉','My','M','R','↯','▣','◆','AWS'];
-const defaults = { brand:'cfxwebstudio', domain:'cfxwebstudio.dev', email:'info@cfxwebstudio.agency', location:'Bulgaria · Remote', profileImage:'', logo:'' };
+const defaults = { brand:'cfxwebstudio', domain:'cfxwebstudio.agency', email:'info@cfxwebstudio.agency', location:'Bulgaria · Remote', profileImage:'', logo:'' };
 const FORMSPREE_FORM_ID = 'xrpgyddy';
 const FORMSPREE_ENDPOINT = `https://formspree.io/f/${FORMSPREE_FORM_ID}`;
 const ADMIN_USER = 'boogyman';
