@@ -161,30 +161,207 @@ function Services({t,services}) {
     {!services.length&&<p className="admin-empty">{bg?'Няма добавени услуги.':'No services added yet.'}</p>}
   </div></section>
 }
+function RocketField() {
+  const rockets = React.useMemo(() => Array.from({length:7}).map((_,i) => ({
+    id:i,
+    top: 6 + Math.random()*80,
+    dur: 14 + Math.random()*16,
+    delay: -(Math.random()*20),
+    dir: i%2===0 ? 'right' : 'left',
+    size: 16 + Math.round(Math.random()*14),
+  })), []);
+  return <div className="rocket-field" aria-hidden="true">{rockets.map(r => <span key={r.id} className={`rocket rocket-${r.dir}`} style={{top:`${r.top}%`,fontSize:`${r.size}px`,animationDuration:`${r.dur}s`,animationDelay:`${r.delay}s`}}>🚀</span>)}</div>;
+}
+
+function FlappyGame({bg}) {
+  const canvasRef = React.useRef(null);
+  const [score,setScore] = React.useState(0);
+  const [best,setBest] = React.useState(0);
+  const [state,setState] = React.useState('idle');
+  const stateRef = React.useRef('idle');
+  React.useEffect(() => { stateRef.current = state; }, [state]);
+  const flapRef = React.useRef(false);
+  React.useEffect(() => {
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    let bird = { x: 50, y: H/2, vy: 0 };
+    let pipes = [];
+    let frame = 0;
+    let raf;
+    let localScore = 0;
+    const gap = 110, pipeW = 34, gravity = 0.38, flapPower = -6.6;
+    const reset = () => { bird = { x:50, y:H/2, vy:0 }; pipes = []; frame = 0; localScore = 0; setScore(0); };
+    const flap = () => { if (stateRef.current === 'playing') bird.vy = flapPower; };
+    flapRef.current = flap;
+    const loop = () => {
+      if (stateRef.current === 'playing') {
+        frame++;
+        bird.vy += gravity; bird.y += bird.vy;
+        if (frame % 95 === 0) { const gy = 30 + Math.random()*(H-gap-60); pipes.push({ x: W, gy }); }
+        pipes.forEach(p => p.x -= 2.6);
+        pipes = pipes.filter(p => p.x > -pipeW);
+        pipes.forEach(p => { if (!p.passed && p.x + pipeW < bird.x) { p.passed = true; localScore++; setScore(localScore); } });
+        const hitGround = bird.y > H - 14 || bird.y < 0;
+        const hitPipe = pipes.some(p => bird.x + 9 > p.x && bird.x - 9 < p.x + pipeW && (bird.y - 9 < p.gy || bird.y + 9 > p.gy + gap));
+        if (hitGround || hitPipe) { setState('over'); setBest(b => Math.max(b, localScore)); }
+      }
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle = '#0b0f1c'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#8b5cf6';
+      pipes.forEach(p => { ctx.fillRect(p.x,0,pipeW,p.gy); ctx.fillRect(p.x,p.gy+gap,pipeW,H-p.gy-gap); });
+      ctx.fillStyle = '#c7bcff'; ctx.beginPath(); ctx.arc(bird.x,bird.y,9,0,Math.PI*2); ctx.fill();
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    const onKey = e => { if (e.code === 'Space') { e.preventDefault(); if (stateRef.current==='playing') flap(); } };
+    const onClick = () => { if (stateRef.current==='playing') flap(); };
+    canvas.addEventListener('mousedown', onClick);
+    canvas.addEventListener('touchstart', onClick);
+    window.addEventListener('keydown', onKey);
+    canvas.dataset.reset = '1';
+    canvas._reset = reset;
+    return () => { cancelAnimationFrame(raf); canvas.removeEventListener('mousedown', onClick); canvas.removeEventListener('touchstart', onClick); window.removeEventListener('keydown', onKey); };
+  }, []);
+  const start = () => { canvasRef.current?._reset?.(); setState('playing'); };
+  return <div className="game-card">
+    <div className="game-head"><b>Flappy Rocket</b><span>{bg?'Точки':'Score'}: {score} · {bg?'Рекорд':'Best'}: {best}</span></div>
+    <canvas ref={canvasRef} width={280} height={220} onClick={() => state!=='playing' && start()}></canvas>
+    {state!=='playing' && <button type="button" className="btn primary small" onClick={start}>{state==='over' ? (bg?'Пак':'Retry') : (bg?'Старт':'Start')}</button>}
+    <small className="game-hint">{bg?'Клик / Space за летене':'Click / Space to flap'}</small>
+  </div>;
+}
+
+function DodgeGame({bg}) {
+  const canvasRef = React.useRef(null);
+  const [score,setScore] = React.useState(0);
+  const [best,setBest] = React.useState(0);
+  const [state,setState] = React.useState('idle');
+  const stateRef = React.useRef('idle');
+  React.useEffect(() => { stateRef.current = state; }, [state]);
+  const keysRef = React.useRef({});
+  React.useEffect(() => {
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    let ship = { x: W/2 };
+    let rocks = [];
+    let frame = 0, speed = 2.2, raf, localScore = 0;
+    const reset = () => { ship = { x: W/2 }; rocks = []; frame = 0; speed = 2.2; localScore = 0; setScore(0); };
+    const loop = () => {
+      if (stateRef.current === 'playing') {
+        frame++; localScore++; if (frame % 30 === 0) setScore(Math.floor(localScore/10));
+        if (keysRef.current.left) ship.x -= 4.2; if (keysRef.current.right) ship.x += 4.2;
+        ship.x = Math.max(12, Math.min(W-12, ship.x));
+        if (frame % 26 === 0) rocks.push({ x: 10+Math.random()*(W-20), y:-10, r: 8+Math.random()*8 });
+        speed += 0.0015;
+        rocks.forEach(r => r.y += speed*2);
+        rocks = rocks.filter(r => r.y < H+20);
+        const hit = rocks.some(r => Math.hypot(r.x-ship.x, r.y-(H-16)) < r.r+9);
+        if (hit) { setState('over'); setBest(b => Math.max(b, Math.floor(localScore/10))); }
+      }
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle = '#0b0f1c'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#5eead4';
+      rocks.forEach(r => { ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,Math.PI*2); ctx.fill(); });
+      ctx.fillStyle = '#c7bcff'; ctx.font = '16px monospace'; ctx.fillText('🚀', ship.x-9, H-8);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    const onDown = e => { if (e.key==='ArrowLeft'||e.key==='a') keysRef.current.left = true; if (e.key==='ArrowRight'||e.key==='d') keysRef.current.right = true; };
+    const onUp = e => { if (e.key==='ArrowLeft'||e.key==='a') keysRef.current.left = false; if (e.key==='ArrowRight'||e.key==='d') keysRef.current.right = false; };
+    window.addEventListener('keydown', onDown); window.addEventListener('keyup', onUp);
+    canvas._reset = reset;
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('keydown', onDown); window.removeEventListener('keyup', onUp); };
+  }, []);
+  const start = () => { canvasRef.current?._reset?.(); setState('playing'); };
+  const press = (dir,v) => { keysRef.current[dir] = v; };
+  return <div className="game-card">
+    <div className="game-head"><b>Rocket Dodge</b><span>{bg?'Точки':'Score'}: {score} · {bg?'Рекорд':'Best'}: {best}</span></div>
+    <canvas ref={canvasRef} width={280} height={220}></canvas>
+    {state!=='playing' && <button type="button" className="btn primary small" onClick={start}>{state==='over' ? (bg?'Пак':'Retry') : (bg?'Старт':'Start')}</button>}
+    <div className="game-touch">
+      <button type="button" onMouseDown={()=>press('left',true)} onMouseUp={()=>press('left',false)} onMouseLeave={()=>press('left',false)} onTouchStart={()=>press('left',true)} onTouchEnd={()=>press('left',false)}>◀</button>
+      <button type="button" onMouseDown={()=>press('right',true)} onMouseUp={()=>press('right',false)} onMouseLeave={()=>press('right',false)} onTouchStart={()=>press('right',true)} onTouchEnd={()=>press('right',false)}>▶</button>
+    </div>
+    <small className="game-hint">{bg?'Стрелки / бутони за движение':'Arrow keys / buttons to move'}</small>
+  </div>;
+}
+
+function InteractiveDesk({bg}) {
+  const [lines,setLines] = React.useState([bg?'добре дошъл в терминала — напиши "help"':'welcome to the terminal — type "help"']);
+  const [buf,setBuf] = React.useState('');
+  const responses = {
+    help: bg?'налични: build, deploy, coffee, ai, rocket, whoami':'available: build, deploy, coffee, ai, rocket, whoami',
+    build: bg?'✓ компилиране... готово за 0.8s':'✓ building... done in 0.8s',
+    deploy: bg?'🚀 качено на production':'🚀 shipped to production',
+    coffee: '☕ brewing...',
+    ai: bg?'AI пише кода, аз му давам идеи 🙂':'AI writes the code, I bring the ideas 🙂',
+    rocket: bg?'towards the moon 🌕':'towards the moon 🌕',
+    whoami: bg?'разработчик, който си играе твърде много':'a developer who plays around too much',
+  };
+  const run = cmd => {
+    const c = cmd.trim().toLowerCase();
+    const out = responses[c] || (c ? (bg?`команда не е намерена: ${c}`:`command not found: ${c}`) : '');
+    setLines(prev => [...prev.slice(-6), `$ ${cmd}`, out].filter(Boolean));
+  };
+  const press = key => {
+    if (key === 'enter') { run(buf); setBuf(''); return; }
+    if (key === '⌫') { setBuf(b => b.slice(0,-1)); return; }
+    if (key === 'space') { setBuf(b => b + ' '); return; }
+    if (key.length === 1) setBuf(b => b + key);
+  };
+  React.useEffect(() => {
+    const onKey = e => {
+      if (e.key === 'Enter') { run(buf); setBuf(''); }
+      else if (e.key === 'Backspace') setBuf(b => b.slice(0,-1));
+      else if (e.key.length === 1) setBuf(b => b + e.key);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [buf]);
+  const rows = [['esc','1','2','3','4','5','6','7','8','9','0','⌫'],['tab','q','w','e','r','t','y','u','i','o','p'],['caps','a','s','d','f','g','h','j','k','l','enter'],['shift','z','x','c','v','b','n','m','space']];
+  return <div className="interactive-desk">
+    <div className="mini-monitor"><div className="screen-top"><i></i><i></i><i></i><b>terminal</b><small>● {bg?'на линия':'online'}</small></div>
+      <pre className="desk-screen">{lines.map((l,i)=><span key={i}>{l}{`\n`}</span>)}<em>$ {buf}<b className="caret">▌</b></em></pre>
+    </div>
+    <div className="mini-keyboard">{rows.map((row,ri)=><div key={ri}>{row.map(k => <i key={k} onClick={()=>press(k)}>{k}</i>)}</div>)}</div>
+    <small className="game-hint">{bg?'Натисни клавишите (реални или тук) — пробвай "help"':'Press keys (real or here) — try "help"'}</small>
+  </div>;
+}
+
 function Experience({t,settings}) {
   const bg = t.experience === 'Опит';
   const stats = bg ? [['10+','години опит'],['40+','завършени проекта'],['20+','доволни клиента']] : [['10+','years experience'],['40+','projects delivered'],['20+','happy clients']];
-  const roles = bg ? [
-    ['2024 — 2026','Full Stack Developer',settings.brand,'Разработка и поддръжка на full-stack приложения, AI инструменти и SaaS продукти — от архитектура до production deployment.',['Next.js','TypeScript','Supabase','Prisma']],
-    ['2022 — 2024','Freelance Developer','Self-employed','Създаване на уеб приложения, административни панели и автоматизации по поръчка на клиенти от различни индустрии.',['React','Node.js','MongoDB','Tailwind CSS']],
-    ['2020 — 2022','Backend Developer','Софтуерна компания','Разработка на backend системи, REST API и бизнес логика за корпоративни клиенти.',['C#','.NET','SQL Server','Docker']],
-    ['2018 — 2020','Software Developer','Дигитална агенция','Изграждане на уеб платформи и вътрешни инструменти с фокус върху стабилност и производителност.',['Python','Java','PostgreSQL','Git']],
-    ['2016 — 2018','Junior Developer','Начало на пътя','Първи стъпки в разработката — усвояване на основите на програмирането и изграждане на малки проекти.',['PHP','MySQL','HTML5','CSS3']]
+  const journey = bg ? [
+    ['01','Първи редове код','HTML и CSS — първият сайт, който изобщо проработи.'],
+    ['02','JavaScript & логика','От статични страници към интерактивност — DOM, събития, асинхронен код.'],
+    ['03','React & компоненти','Мислене в компоненти — state, props, hooks и модерни интерфейси.'],
+    ['04','Backend & бази данни','API-та, автентикация, PostgreSQL/Supabase — цели системи, не само страници.'],
+    ['05','Full-stack продукти','От идея до production — реални приложения, използвани от истински хора.'],
+    ['06','AI-асистирана разработка','Работа рамо до рамо с AI — по-бързо изграждане, по-малко грешки, повече продукт.'],
   ] : [
-    ['2024 — 2026','Full Stack Developer',settings.brand,'Building and maintaining full-stack applications, AI tools and SaaS products — from architecture to production deployment.',['Next.js','TypeScript','Supabase','Prisma']],
-    ['2022 — 2024','Freelance Developer','Self-employed','Building web applications, admin panels and automations for clients across different industries.',['React','Node.js','MongoDB','Tailwind CSS']],
-    ['2020 — 2022','Backend Developer','Software company','Building backend systems, REST APIs and business logic for enterprise clients.',['C#','.NET','SQL Server','Docker']],
-    ['2018 — 2020','Software Developer','Digital agency','Building web platforms and internal tools with a focus on stability and performance.',['Python','Java','PostgreSQL','Git']],
-    ['2016 — 2018','Junior Developer','Getting started','First steps into development — learning programming fundamentals and building small projects.',['PHP','MySQL','HTML5','CSS3']]
+    ['01','First lines of code','HTML and CSS — the first site that actually worked.'],
+    ['02','JavaScript & logic','From static pages to interactivity — the DOM, events, async code.'],
+    ['03','React & components','Thinking in components — state, props, hooks and modern UI.'],
+    ['04','Backend & databases','APIs, auth, PostgreSQL/Supabase — whole systems, not just pages.'],
+    ['05','Full-stack products','From idea to production — real apps used by real people.'],
+    ['06','AI-assisted development','Working side by side with AI — faster builds, fewer bugs, more product.'],
   ];
-  return <section className="single-page"><div className="wrap experience-page">
-    <div className="portfolio-top"><p className="page-intro">{t.experienceIntro}</p><div className="portfolio-stats">{stats.map(([value,label])=><span key={label}><b>{value}</b>{label}</span>)}</div></div>
-    <div className="about-lower">
-      <div className="timeline">{roles.map(([range,role,place,desc,techs])=><article key={range}><i></i><h3>{role} <em>{range}</em></h3><b>{place}</b><p>{desc}</p><small>{techs.join('　')}</small></article>)}</div>
-      <aside className="about-terminal"><div className="about-terminal-head"><i></i><i></i><i></i><span>experience.log</span><b>● {bg?'на линия':'online'}</b></div><pre><em>$</em> git log --oneline -n 4{`\n`}<strong>a1c92f</strong> {bg?'ship: AI dashboard':'ship: AI dashboard'}{`\n`}<strong>7e2d10</strong> {bg?'fix: auth edge cases':'fix: auth edge cases'}{`\n`}<strong>4b8a31</strong> {bg?'chore: upgrade stack':'chore: upgrade stack'}{`\n`}<strong>2f19aa</strong> {bg?'launch: v1':'launch: v1'}{`\n`}{`\n`}<small>✓ {bg?'активно всеки ден':'shipping every day'}</small><b className="caret">▌</b></pre></aside>
+  return <section className="single-page experience-page-fun">
+    <RocketField/>
+    <div className="wrap experience-wrap">
+      <div className="portfolio-top"><p className="page-intro">{t.experienceIntro}</p><div className="portfolio-stats">{stats.map(([value,label])=><span key={label}><b>{value}</b>{label}</span>)}</div></div>
+      <div className="journey-steps">{journey.map(([num,title,desc],i)=><div className={`journey-step js-${i%2}`} key={num}><span className="step-num">{num}</span><h3>{title}</h3><p>{desc}</p></div>)}</div>
+      <div className="playground">
+        <div className="playground-head"><span className="section-tag">// PLAYGROUND</span><h2>{bg?'Малко забавление между редовете код':'A little fun between the lines of code'}</h2><p className="playground-note">{bg?'Тази секция — включително игрите — е построена директно в браузъра, от нас.':'This whole section — games included — was built right in the browser, by us.'}</p></div>
+        <div className="games-grid"><FlappyGame bg={bg}/><DodgeGame bg={bg}/></div>
+        <InteractiveDesk bg={bg}/>
+      </div>
     </div>
-  </div></section>
+  </section>
 }
+
 function Contact({t,settings,available,sent,setSent}) {
   const bg = t.send === 'Изпрати запитване';
   const [sending,setSending] = useState(false);
