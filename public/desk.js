@@ -739,7 +739,10 @@
       for (var gx = 0; gx <= 424; gx += 6) { var gy = 385 + 28 * Math.sin(gx * 0.04 + t * 2.2) + 14 * Math.sin(gx * 0.11 - t * 3.1); gx ? x.lineTo(28 + gx, gy) : x.moveTo(28 + gx, gy); }
       x.stroke();
       x.font = '16px Consolas, monospace';
-      for (var i = 0; i < 12; i++) { var idx = (Math.floor(t * 1.6) + i) % logs.length; x.fillStyle = i === 11 ? '#ff5a6e' : 'rgba(200,180,186,' + (0.25 + i * 0.05) + ')'; x.fillText(logs[idx] + (idx === 5 ? (Math.floor(t * 1.6) + i) : ''), 28, 470 + i * 24); }
+      var lp = t * 1.6, lb = Math.floor(lp), lf = lp - lb;
+      x.save(); x.beginPath(); x.rect(0, 452, 480, 290); x.clip();
+      for (var i = 0; i < 13; i++) { var idx = (lb + i) % logs.length, al = i === 0 ? 0.25 * (1 - lf) : (i === 12 ? 1 * lf : (0.25 + i * 0.05)); x.fillStyle = i === 11 ? 'rgba(255,90,110,1)' : 'rgba(200,180,186,' + Math.min(1, al) + ')'; x.fillText(logs[idx] + (idx === 5 ? (lb + i) : ''), 28, 470 + (i - lf) * 24); }
+      x.restore();
       var BY = 748, BH = 46 + hot * 6;
       x.save(); x.shadowColor = '#ff2a3d'; x.shadowBlur = 10 + pul * 14 + hot * 16; x.fillStyle = hot > 0.3 ? '#ff2a3d' : 'rgba(255,42,61,' + (0.16 + pul * 0.1) + ')'; rr(x, 28, BY, 424, BH, BH / 2); x.fill(); x.strokeStyle = 'rgba(255,42,61,.8)'; x.lineWidth = 2; x.stroke(); x.restore();
       x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = '800 19px Segoe UI, Arial'; x.fillText('▶  ' + bg('КЛИКНИ — ИНСТРУМЕНТИ', 'CLICK — TOOLS'), 240, BY + BH / 2 + 7); x.textAlign = 'left';
@@ -1070,7 +1073,7 @@
     function loop() {
       if (!running) return; requestAnimationFrame(loop);
       var nowMs = performance.now(), busy = gl.flying || state.busy || G.focus || nowMs < activeUntil;
-      var cap = state.open && !state.busy ? 24 : (busy ? (lowEnd ? 60 : 1000) : 40);
+      var cap = state.open && !state.busy ? 24 : (busy ? (lowEnd ? 60 : 1000) : 60);
       if (nowMs - lastR < 1000 / cap - 2) return; lastR = nowMs;
       var t = clock.getElapsedTime();
       var dtt = t - prevT; prevT = t;
@@ -1080,8 +1083,8 @@
         var avg = fpsCnt ? fpsAcc / fpsCnt : 0.016; fpsT = t; fpsAcc = 0; fpsCnt = 0;
         if (avg > 1.5 / Math.min(cap, 60) && pr > 0.8) { lowHits++; if (lowHits >= 2) { lowHits = 0; pr = Math.max(0.75, pr - 0.25); renderer.setPixelRatio(pr); renderer.setSize(window.innerWidth, window.innerHeight, false); } } else lowHits = 0;
       } rgbBoost *= 0.985; rgbPhase += dtt * (1 + 4 * interactive.services.userData.h + rgbBoost * 9);
-      var sl = state.open ? 4 : 1; if (t - last1 > 0.066 * sl) { last1 = t; drawMain(t, interactive.projects.userData.h); drawRGB(rgbPhase); animMouse(rgbPhase); drawPhone(t); }
-      gameStep(t); if (t - last2 > (G.focus ? 0.033 : 0.09 * sl)) { last2 = t; drawS2(t); if (!G.focus) drawS3(t, interactive.tools.userData.h); }
+      var sl = state.open ? 4 : 1; if (t - last1 > 0.028 * sl) { last1 = t; drawMain(t, interactive.projects.userData.h); drawRGB(rgbPhase); animMouse(rgbPhase); drawPhone(t); }
+      gameStep(t); if (t - last2 > 0.028 * sl) { last2 = t; drawS2(t); if (!G.focus) drawS3(t, interactive.tools.userData.h); }
       mouse.position.x = 0.82 + par.x * 0.025; mouse.position.z = 0.52 + par.y * 0.02;
       fans.forEach(function (f, i) { f.rotation.z -= 0.06 + i * 0.004 + fanBoost * 0.45; });
       steam.forEach(function (sp) { var p = (sp.userData.p + t * 0.12) % 1; sp.position.set(Math.sin(p * 9 + sp.userData.p * 20) * 0.012, 0.12 + p * 0.2, 0); var sc2 = 0.03 + p * 0.09; sp.scale.set(sc2, sc2, 1); sp.material.opacity = 0.16 * (1 + steamBoost * 2.5) * Math.sin(p * Math.PI); });
