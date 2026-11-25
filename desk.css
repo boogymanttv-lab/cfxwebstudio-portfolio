@@ -275,3 +275,8 @@ body.gaming #hero,body.gaming #dock,body.gaming #classic,body.gaming #tooltip{op
 #loader::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(10,7,9,.78) 0,rgba(10,7,9,.35) 38%,transparent 70%);pointer-events:none}
 #rainBrand{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);font:800 clamp(30px,7vw,78px)/1 "Segoe UI",system-ui,sans-serif;letter-spacing:2px;color:#fff;text-shadow:0 0 18px #ff2a3d,0 0 50px #ff2a3d,0 0 90px rgba(255,42,61,.6);animation:brandIn 1.4s .2s both;white-space:nowrap}
 @keyframes brandIn{0%{opacity:0;letter-spacing:18px;filter:blur(8px)}60%{opacity:1}100%{opacity:1;letter-spacing:2px;filter:none}}
+
+/* проекти със снимки */
+.thumb.has-img{height:190px;background-image:none;background:#120d15}
+.thumb.has-img img{object-fit:cover;object-position:top;transition:transform .6s}
+.card.proj:hover .thumb.has-img img{transform:scale(1.05)}

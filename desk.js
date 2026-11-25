@@ -24,22 +24,18 @@
 
   function renderProjects() {
     var u = T();
-    var h = '<h2>' + u.projects + '</h2><p class="sub">' + u.selected + '</p><div class="grid">';
+    var h = '<h2>' + u.projects + '</h2><p class="sub">' + u.selected + '</p><div class="grid proj-grid">';
     PROJECTS.forEach(function (p) {
+      if (p.hidden) return;
       var title = lang === 'en' ? (p.titleEn || p.titleBg) : p.titleBg;
       var desc = lang === 'en' ? p.descEn : p.descBg;
       var cls = (p.thumbClass || 'thumb-1').replace('thumb-', 't');
-      h += '<article class="card"><div class="thumb ' + cls + '">' + (p.initials || '') +
-        (p.image ? '<img src="' + p.image + '" alt="' + title + '" loading="lazy" onerror="this.remove()">' : '') + '</div>' +
-        '<h4>' + title + '</h4><p>' + desc + '</p><div class="tags">' + (p.tags || []).map(tagHtml).join('') + '</div>';
-      var links = '';
-      if (p.link) links += '<a href="' + p.link + '" target="_blank" rel="noopener">' + u.viewSite + '</a>';
-      if (links) h += '<div class="links">' + links + '</div>';
-      h += '</article>';
+      h += '<article class="card proj"><div class="thumb ' + (p.image ? 'has-img ' : '') + cls + '">' + (p.image ? '' : (p.initials || '')) +
+        (p.image ? '<img src="' + p.image + '" alt="' + title + '" loading="lazy" onerror="var q=this.parentNode;q.classList.remove(\'has-img\');q.insertAdjacentText(\'afterbegin\',\'' + (p.initials || '') + '\');this.remove()">' : '') + '</div>' +
+        '<h4>' + title + '</h4><p>' + desc + '</p><div class="tags">' + (p.tags || []).map(tagHtml).join('') + '</div></article>';
     });
     return h + '</div>';
   }
-
   function mailto(title) { return 'mailto:' + SITE.email + '?subject=' + encodeURIComponent((lang === 'en' ? 'Inquiry: ' : 'Запитване: ') + title); }
   function pkgCard(n, title, desc, old, price, per) {
     var u = T();
