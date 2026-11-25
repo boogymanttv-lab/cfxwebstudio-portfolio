@@ -1015,7 +1015,7 @@
   document.querySelectorAll('[data-set-lang]').forEach(function (b) { b.addEventListener('click', function () { applyLang(b.getAttribute('data-set-lang')); }); });
 
   /* ---------- старт ---------- */
-  applyLang(lang);
+  try { applyLang(lang); } catch (e) { console.warn(e); }
   var hash = (location.hash || '').replace('#', '');
 
   function enterSite() {
