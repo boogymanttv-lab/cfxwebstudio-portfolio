@@ -972,7 +972,31 @@
     };
     var cam = { pos: new THREE.Vector3(0, 2.8, 8), look: new THREE.Vector3(0, 0.6, 0) };
     var par = { x: 0, y: 0, tx: 0, ty: 0 };
+    /* --- адаптивна мобилна версия: стопове, които се прелистват с плъзгане --- */
+    var MSTOPS = [
+      { look: [0, 0.6, 0.05], w: 1.75, bg: 'Работно място', en: 'Workstation' },
+      { look: [-0.93, 0.62, -0.3], w: 0.95, bg: 'Snake монитор', en: 'Snake screen' },
+      { look: [0.93, 0.62, -0.3], w: 0.95, bg: 'Инструменти', en: 'Tools screen' },
+      { look: [1.7, 0.55, -0.3], w: 1.5, bg: 'PC и аудио', en: 'PC & audio' },
+      { look: [-1.5, 0.55, 0.1], w: 1.8, bg: 'Лампа и слушалки', en: 'Lamp & headset' }
+    ], mi = 0;
+    function isMob() { return camera.aspect < 0.85; }
+    function mobView(i) {
+      var s = MSTOPS[i], look = new THREE.Vector3().fromArray(s.look), hf = 2 * Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
+      var dist = Math.min(8, (s.w / 2) / Math.tan(hf / 2) + 0.35);
+      return { pos: look.clone().add(new THREE.Vector3(i === 1 ? 0.25 : i === 2 ? -0.25 : 0, 0.22, dist)), look: look };
+    }
+    var mdots = document.createElement('div'); mdots.id = 'mstops'; document.body.appendChild(mdots);
+    function drawDots() {
+      var h = '<b>' + bg(MSTOPS[mi].bg, MSTOPS[mi].en) + '</b><div>';
+      for (var q = 0; q < MSTOPS.length; q++) h += '<i' + (q === mi ? ' class="on"' : '') + ' data-i="' + q + '"></i>';
+      mdots.innerHTML = h + '</div>';
+    }
+    function goStop(n) { mi = (n + MSTOPS.length) % MSTOPS.length; drawDots(); if (!state.open && !state.game) flyTo('home', 0.8); }
+    mdots.addEventListener('click', function (e) { var d = e.target.getAttribute && e.target.getAttribute('data-i'); if (d !== null && d !== undefined) goStop(+d); });
+    drawDots();
     function viewFor(name) {
+      if (name === 'home' && isMob()) return mobView(mi);
       var v = VIEWS[name], a = camera.aspect, look = new THREE.Vector3().fromArray(v.look), pos = new THREE.Vector3().fromArray(v.pos);
       if (name === 'home') {
         if (a < 1.2) { pos.z = Math.min(9, 3.4 / a); pos.y = 1.0; look.y = 0.78; }
@@ -1003,7 +1027,7 @@
       var h = ray.intersectObjects(hits, false); return h.length ? h[0].object.userData.sec : null;
     }
     canvas.addEventListener('pointermove', function (e) {
-      par.tx = (e.clientX / window.innerWidth - 0.5) * 2; par.ty = (e.clientY / window.innerHeight - 0.5) * 2;
+      if (!gyroOn) { par.tx = (e.clientX / window.innerWidth - 0.5) * 2; par.ty = (e.clientY / window.innerHeight - 0.5) * 2; }
       if (state.open || state.game || e.pointerType === 'touch') return;
       var s = pick(e); if (s && s !== state.hover) sfx('tick'); state.hover = s;
       if (ray.ray.intersectPlane(wallPlane, wallPt)) flashTarget.copy(wallPt);
@@ -1012,9 +1036,22 @@
       else tooltip.classList.remove('show');
     });
     canvas.addEventListener('pointerleave', function () { state.hover = null; tooltip.classList.remove('show'); canvas.classList.remove('pointer'); });
-    canvas.addEventListener('click', function (e) { if (state.open || state.game) return; var s = pick(e); if (!s) return; if (s === 'projects') openSection('desktop'); else if (RENDER[s]) openSection(s); else if (TOYS[s]) TOYS[s](); });
+    var swipedAt = 0, gyroOn = false, sx0 = null;
+    canvas.addEventListener('click', function (e) { if (state.open || state.game || performance.now() - swipedAt < 400) return; var s = pick(e); if (!s) return; if (s === 'projects') openSection('desktop'); else if (RENDER[s]) openSection(s); else if (TOYS[s]) TOYS[s](); });
     var sw = null;
-    canvas.addEventListener('pointerdown', function (e) { sw = state.game ? { x: e.clientX, y: e.clientY } : null; });
+    canvas.addEventListener('pointerdown', function (e) { sw = state.game ? { x: e.clientX, y: e.clientY } : null; sx0 = { x: e.clientX, y: e.clientY }; });
+    canvas.addEventListener('pointerup', function (e) {
+      if (!sx0 || !isMob() || state.open || state.game || gl.flying) { sx0 = null; return; }
+      var dx = e.clientX - sx0.x, dy = e.clientY - sx0.y; sx0 = null;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.2) { swipedAt = performance.now(); goStop(mi + (dx < 0 ? 1 : -1)); }
+    });
+    function initGyro() {
+      if (!isTouch || gyroOn || !window.DeviceOrientationEvent) return;
+      function on() { window.addEventListener('deviceorientation', function (e) { if (e.gamma == null) return; gyroOn = true; par.tx = Math.max(-1, Math.min(1, e.gamma / 22)); par.ty = Math.max(-1, Math.min(1, ((e.beta || 50) - 50) / 22)); }); }
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') { DeviceOrientationEvent.requestPermission().then(function (r) { if (r === 'granted') on(); }).catch(function () {}); }
+      else on();
+    }
+    canvas.addEventListener('touchend', function () { initGyro(); }, { once: true, passive: true });
     canvas.addEventListener('pointerup', function (e) {
       if (!state.game || !sw) { sw = null; return; }
       var dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null;

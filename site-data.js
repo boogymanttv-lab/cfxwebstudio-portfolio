@@ -7,7 +7,7 @@ const SITE = {
   ui: {
     bg: {
       hint: "Движи мишката и кликай по обектите — почти всичко на бюрото е живо",
-      hintTouch: "Докосвай обектите — почти всичко е живо",
+      hintTouch: "Плъзгай наляво/надясно и докосвай обектите",
       loading: "Зареждане на бюрото…",
       back: "Назад към бюрото",
       classic: "Класически сайт",
@@ -36,7 +36,7 @@ const SITE = {
     },
     en: {
       hint: "Move your mouse and click the objects — almost everything on the desk is alive",
-      hintTouch: "Tap the objects — almost everything is alive",
+      hintTouch: "Swipe left/right and tap the objects",
       loading: "Loading the desk…",
       back: "Back to the desk",
       classic: "Classic site",

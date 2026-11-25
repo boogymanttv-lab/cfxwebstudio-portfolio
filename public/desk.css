@@ -280,3 +280,12 @@ body.gaming #hero,body.gaming #dock,body.gaming #classic,body.gaming #tooltip{op
 .thumb.has-img{height:190px;background-image:none;background:#120d15}
 .thumb.has-img img{object-fit:cover;object-position:top;transition:transform .6s}
 .card.proj:hover .thumb.has-img img{transform:scale(1.05)}
+
+/* адаптивна мобилна версия */
+#mstops{display:none;position:fixed;left:0;right:0;bottom:78px;z-index:15;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+#mstops b{font:700 13px 'Segoe UI',Arial,sans-serif;color:#fff;letter-spacing:.04em;padding:6px 14px;border-radius:999px;background:rgba(12,8,14,.78);border:1px solid rgba(255,42,61,.45);box-shadow:0 0 14px rgba(255,42,61,.25)}
+#mstops div{display:flex;gap:10px;pointer-events:auto;padding:6px 10px}
+#mstops i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .25s}
+#mstops i.on{background:#ff2a3d;box-shadow:0 0 10px #ff2a3d;transform:scale(1.35)}
+@media (max-aspect-ratio:17/20){#mstops{display:flex}}
+body.open #mstops,body.gaming #mstops{display:none!important}
