@@ -19,16 +19,16 @@
 
 const PROJECTS = [
   {
-    image: "images/projects/3dprintingbg.jpg",
-    initials: "3D",
-    thumbClass: "thumb-1",
-    titleBg: "3DPrintingBG",
-    titleEn: "3DPrintingBG",
-    link: "https://www.3dprintingbg.com/",
+    image: "images/projects/3dbricksbg.jpg",
+    initials: "BF",
+    thumbClass: "thumb-2",
+    titleBg: "3DBricksBG",
+    titleEn: "3DBricksBG",
+    link: "https://3dbricksbg.com/",
     github: "",
-    descBg: "Български маркетплейс за 3D printing общността — обяви, магазини, категории и търсене по градове, свързващ продавачи и хоби ентусиасти в цялата страна.",
-    descEn: "A Bulgarian marketplace for the 3D printing community — listings, shops, categories and city-based search, connecting sellers and hobbyists across the country.",
-    tags: ["Next.js", "TypeScript", "Supabase", "Vercel"],
+    descBg: "Уеб платформа, която превръща качена снимка в мозайка от 3D-принтируеми свързващи се тухлички — от портрет до готов за печат модел.",
+    descEn: "A web platform that turns an uploaded photo into a mosaic of 3D-printable interlocking bricks — from portrait to print-ready model.",
+    tags: ["Web App", "3D Printing", "Image Processing"],
     featured: true
   },
   {
@@ -45,29 +45,29 @@ const PROJECTS = [
     featured: true
   },
   {
-    image: "images/projects/melisalingo.jpg",
-    initials: "ML",
-    thumbClass: "thumb-2",
-    titleBg: "MelisaLingo",
-    titleEn: "MelisaLingo",
-    link: "https://melisa-lingo.vercel.app/",
+    image: "images/projects/foodsdany.jpg",
+    initials: "DF",
+    thumbClass: "thumb-4",
+    titleBg: "DannyFoods",
+    titleEn: "DannyFoods",
+    link: "https://www.foodsdany.bg/",
     github: "",
-    descBg: "Геймифицирана платформа за изучаване на английски с тест за ниво, живи сесии с преподаватели и Stripe плащания за достъп до курсовете.",
-    descEn: "A gamified English-learning platform with placement testing, live instructor sessions and Stripe-powered payments for course access.",
-    tags: ["Vite", "JavaScript", "Stripe API", "Vercel"],
+    descBg: "Уебсайт за клиент в хранителния бранш — изработен, хостван и поддържан от мен.",
+    descEn: "A website for a food-industry client — designed, hosted and maintained by me.",
+    tags: ["Web Design", "Hosting", "Maintenance"],
     featured: false
   },
   {
-    image: "",
-    initials: "PC",
-    thumbClass: "thumb-4",
-    titleBg: "Персонализиран скрипт/програма",
-    titleEn: "Custom Script / Program",
-    link: "",
+    image: "images/projects/3dprintingbg.jpg",
+    initials: "3D",
+    thumbClass: "thumb-1",
+    titleBg: "3DPrintingBG",
+    titleEn: "3DPrintingBG",
+    link: "https://www.3dprintingbg.com/",
     github: "",
-    descBg: "Правя и персонализирани програми и скриптове за игри, Windows и всичко останало — на C#, Python, Java или каквото пасне на задачата, от малки помощни инструменти до по-сложни desktop приложения.",
-    descEn: "I also build custom programs and scripts for games, Windows and pretty much anything else — in C#, Python, Java or whatever fits the task, from small utility tools to more complex desktop apps.",
-    tags: ["C#", ".NET", { bg: "По заявка", en: "Custom-built" }],
-    featured: false
+    descBg: "Български маркетплейс за 3D printing общността — обяви, магазини, категории и търсене по градове, свързващ продавачи и хоби ентусиасти в цялата страна.",
+    descEn: "A Bulgarian marketplace for the 3D printing community — listings, shops, categories and city-based search, connecting sellers and hobbyists across the country.",
+    tags: ["Next.js", "TypeScript", "Supabase", "Vercel"],
+    featured: true
   }
 ];
