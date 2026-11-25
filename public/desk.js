@@ -305,8 +305,8 @@
     if (THREE.ColorManagement) THREE.ColorManagement.legacyMode = false;
 
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.6 : 2));
-    renderer.shadowMap.enabled = true;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.5));
+    renderer.shadowMap.enabled = true; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -320,6 +320,7 @@
 
     /* --- помощници --- */
     function mk(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+    function dyn(t) { t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; t.anisotropy = 1; return t; }
     function tex(c) { var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8; return t; }
     function std(color, o) { o = o || {}; return new THREE.MeshStandardMaterial({ color: color, roughness: o.r !== undefined ? o.r : 0.6, metalness: o.m || 0, emissive: o.e || 0x000000, emissiveIntensity: o.ei || 1, transparent: !!o.t, opacity: o.o !== undefined ? o.o : 1 }); }
     function bas(color) { return new THREE.MeshBasicMaterial({ color: color, toneMapped: false }); }
@@ -394,7 +395,7 @@
     box(0.012, 0.004, 0.002, bas(0xff2038), 0.6, 0.385, 0.0235, mon, false);
     box(1.34, 0.78, 0.045, plastic, 0, 0.76, 0, mon);
     box(0.9, 0.46, 0.07, plastic, 0, 0.76, -0.05, mon);
-    var screenC = mk(1024, 576), sctx = screenC.getContext('2d'), screenT = tex(screenC);
+    var screenC = mk(1024, 576), sctx = screenC.getContext('2d'), screenT = dyn(tex(screenC));
     var scr = new THREE.Mesh(new THREE.PlaneGeometry(1.26, 0.709), new THREE.MeshBasicMaterial({ map: screenT, toneMapped: false }));
     scr.position.set(0, 0.76, 0.0235); mon.add(scr);
     var ambi = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.5), new THREE.MeshBasicMaterial({ map: glowTex(255, 30, 55), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
@@ -486,7 +487,7 @@
     box(1.075, 0.008, 0.395, std(0x1b1721, { r: 0.3, m: 0.85 }), 0, 0.004, 0, kb);
     box(1.06, 0.03, 0.385, std(0x0d0b10, { r: 0.35, m: 0.7 }), 0, 0.019, 0, kb);
     box(0.36, 0.003, 0.003, bas(0xff2038), 0, 0.02, 0.1935, kb, false);
-    var rgbC = mk(256, 64), rgx = rgbC.getContext('2d'), rgbT = tex(rgbC);
+    var rgbC = mk(256, 64), rgx = rgbC.getContext('2d'), rgbT = dyn(tex(rgbC));
     var rgbP = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.345), new THREE.MeshBasicMaterial({ map: rgbT, toneMapped: false }));
     rgbP.rotation.x = -Math.PI / 2; rgbP.position.y = 0.0345; kb.add(rgbP);
     function drawRGB(t) {
@@ -535,7 +536,7 @@
     interactive.services = kb;
 
     // мишка (gaming, RGB)
-    var mouse = new THREE.Group(); mouse.position.set(0.82, 0, 0.52); mouse.rotation.y = 0.12; scene.add(mouse);
+    var mouse = new THREE.Group(); mouse.position.set(0.82, 0, 0.52); mouse.rotation.y = 0.12; mouse.scale.setScalar(1.45); scene.add(mouse);
     var mMat = std(0x18131d, { r: 0.3, m: 0.35 }), mDark = std(0x050407, { r: 0.6 }), rgbBoost = 0;
     var mBody = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 24), mMat); mBody.scale.set(0.034, 0.02, 0.062); mBody.position.y = 0.016; mBody.castShadow = true; mouse.add(mBody);
     function mY(z) { return 0.016 + 0.02 * Math.sqrt(Math.max(0, 1 - (z / 0.062) * (z / 0.062))); }
@@ -547,11 +548,9 @@
     var mRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.05, 6, 40), bas(0xff2038)); mRing.rotation.x = -Math.PI / 2; mRing.scale.set(0.0345, 0.0625, 0.05); mRing.position.y = 0.0045; mouse.add(mRing);
     var mGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.4), new THREE.MeshBasicMaterial({ map: glowTex(255, 255, 255), color: 0xff2038, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
     mGlow.rotation.x = -Math.PI / 2; mGlow.position.y = 0.0058; mouse.add(mGlow);
-    var mLight = new THREE.PointLight(0xff2038, 0.5, 0.7, 1.6); mLight.position.y = 0.06; mouse.add(mLight);
     function animMouse(ph) {
       var h = ((350 + 38 * Math.sin(ph * 2.4 + 0.6) + 16 * Math.sin(ph * 0.7) + 720) % 360) / 360;
       [mRing.material, wheel.material, mLogo.material, mGlow.material].forEach(function (m) { m.color.setHSL(h, 1, 0.5); });
-      mLight.color.setHSL(h, 1, 0.55);
     }
     mouse.add(hitBox(0.1, 0.06, 0.15, 0.02));
     scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0.82, 0.012, 0.46), new THREE.Vector3(0.82, 0.012, 0.2), new THREE.Vector3(0.5, 0.012, -0.1), new THREE.Vector3(0.2, 0.012, -0.5)]), 24, 0.004, 6), std(0x0a0809)));
@@ -585,7 +584,7 @@
     var ph = new THREE.Group(); ph.position.set(1.28, 0, 0.58); ph.rotation.y = -0.4; scene.add(ph);
     box(0.11, 0.02, 0.1, std(0x1c1822, { r: 0.4, m: 0.5 }), 0, 0.01, -0.01, ph);
     var phBody = box(0.088, 0.175, 0.01, std(0x0d0d12, { r: 0.3, m: 0.6 }), 0, 0.105, 0, ph); phBody.rotation.x = -0.32;
-    var phC = mk(256, 512), phx = phC.getContext('2d'), phT = tex(phC);
+    var phC = mk(256, 512), phx = phC.getContext('2d'), phT = dyn(tex(phC));
     var phScr = new THREE.Mesh(new THREE.PlaneGeometry(0.078, 0.158), new THREE.MeshBasicMaterial({ map: phT, toneMapped: false }));
     phScr.position.set(0, 0.105, 0.0056); phScr.rotation.x = -0.32; ph.add(phScr);
     var phLight = new THREE.PointLight(0xff3050, 0.5, 1.2, 1.6); phLight.position.set(0, 0.16, 0.12); ph.add(phLight);
@@ -612,7 +611,7 @@
     var mon2 = new THREE.Group(); mon2.position.set(-0.93, 0, -0.3); mon2.rotation.y = 0.42; scene.add(mon2);
     box(0.012, 0.004, 0.002, bas(0xff2038), 0.2, 0.235, 0.021, mon2, false);
     box(0.5, 0.86, 0.04, plastic, 0, 0.64, 0, mon2);
-    var s2C = mk(480, 820), s2x = s2C.getContext('2d'), s2T = tex(s2C);
+    var s2C = mk(480, 820), s2x = s2C.getContext('2d'), s2T = dyn(tex(s2C));
     var scr2 = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.82), new THREE.MeshBasicMaterial({ map: s2T, toneMapped: false })); scr2.position.set(0, 0.64, 0.021); mon2.add(scr2);
     /* --- мини игра Snake на втория монитор (реклама) --- */
     var G = { mode: 'demo', focus: false, paused: false, cols: 20, rows: 20, cs: 22, ox: 20, oy: 112, snake: [], dir: [1, 0], q: [], food: [0, 0], score: 0, best: 0, last: 0, flash: 0 };
@@ -722,7 +721,7 @@
     var mon3 = new THREE.Group(); mon3.position.set(0.93, 0, -0.3); mon3.rotation.y = -0.42; scene.add(mon3);
     box(0.5, 0.86, 0.04, plastic, 0, 0.64, 0, mon3);
     box(0.012, 0.004, 0.002, bas(0xff2038), -0.2, 0.235, 0.021, mon3, false);
-    var s3C = mk(480, 820), s3x = s3C.getContext('2d'), s3T = tex(s3C);
+    var s3C = mk(480, 820), s3x = s3C.getContext('2d'), s3T = dyn(tex(s3C));
     var scr3 = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.82), new THREE.MeshBasicMaterial({ map: s3T, toneMapped: false })); scr3.position.set(0, 0.64, 0.021); mon3.add(scr3);
     var logs = ['[auto] target locked', '[ok] script running', '[ok] profile loaded', '[..] waiting for input', '[ok] sync complete', '[auto] loop #', '[ok] build passed', '[ok] bot online'];
     function drawS3(t, hv) {
@@ -801,7 +800,7 @@
     var steamTex = glowTex(255, 255, 255), steam = [];
     for (var s = 0; s < 7; s++) { var sp2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: steamTex, transparent: true, opacity: 0, depthWrite: false })); sp2.userData.p = s / 7; sp2.scale.set(0.05, 0.05, 1); mug.add(sp2); steam.push(sp2); }
 
-    var neonC = mk(1024, 256), nx = neonC.getContext('2d'), neonT = tex(neonC);
+    var neonC = mk(1024, 256), nx = neonC.getContext('2d'), neonT = dyn(tex(neonC));
     var NEON = [['#ff3550', '#ff1a3a', 0xff1a3a, [255, 30, 55]], ['#35e0ff', '#00b8ff', 0x00b8ff, [0, 184, 255]], ['#c58bff', '#8a3cff', 0x8a3cff, [138, 60, 255]], ['#6dff9f', '#00e060', 0x00e060, [0, 224, 96]]], neonIdx = 0;
     function drawNeon(i) {
       var col = NEON[i]; nx.clearRect(0, 0, 1024, 256); nx.textAlign = 'center'; nx.textBaseline = 'middle'; nx.font = '800 104px "Segoe UI", Arial, sans-serif';
@@ -837,7 +836,7 @@
     });
 
     // стенен часовник (показва реалното време)
-    var clkC = mk(256, 256), clx = clkC.getContext('2d'), clkT = tex(clkC);
+    var clkC = mk(256, 256), clx = clkC.getContext('2d'), clkT = dyn(tex(clkC));
     var clock = new THREE.Group(); clock.position.set(2.35, 1.72, -0.88); scene.add(clock);
     var clkFace = new THREE.Mesh(new THREE.CircleGeometry(0.15, 40), new THREE.MeshBasicMaterial({ map: clkT, toneMapped: false })); clock.add(clkFace);
     var clkRing = new THREE.Mesh(new THREE.TorusGeometry(0.155, 0.012, 8, 40), bas(0xff2038)); clock.add(clkRing);
@@ -1025,12 +1024,18 @@
     gl = { enterGame: enterGame, exitGame: exitGame, gameDir: gameDir, gameStart: gameStart, renderer: renderer, camera: camera, cam: cam, flyTo: flyTo, viewFor: viewFor, neon: neon, flying: false, pressKey: pressKey, hideBubble: hideBubble };
 
     /* --- цикъл --- */
-    var clock = new THREE.Clock(), last2 = 0, last1 = 0, running = true, hv = new THREE.Vector3(), prevT = 0, rgbPhase = 0;
+    var clock = new THREE.Clock(), last2 = 0, last1 = 0, running = true, hv = new THREE.Vector3(), prevT = 0, rgbPhase = 0, frameN = 0, fpsAcc = 0, fpsCnt = 0, fpsT = 0, pr = renderer.getPixelRatio(), lowHits = 0;
     document.addEventListener('visibilitychange', function () { var was = running; running = !document.hidden; if (running && !was) loop(); });
     function loop() {
       if (!running) return; requestAnimationFrame(loop);
       var t = clock.getElapsedTime();
-      var dtt = t - prevT; prevT = t; rgbBoost *= 0.985; rgbPhase += dtt * (1 + 4 * interactive.services.userData.h + rgbBoost * 9);
+      var dtt = t - prevT; prevT = t;
+      if ((frameN++ & 3) === 0) renderer.shadowMap.needsUpdate = true;
+      if (dtt > 0 && dtt < 0.5) { fpsAcc += dtt; fpsCnt++; }
+      if (t - fpsT > 3) {
+        var avg = fpsCnt ? fpsAcc / fpsCnt : 0.016; fpsT = t; fpsAcc = 0; fpsCnt = 0;
+        if (avg > 0.028 && pr > 0.8) { lowHits++; if (lowHits >= 2) { lowHits = 0; pr = Math.max(0.75, pr - 0.25); renderer.setPixelRatio(pr); renderer.setSize(window.innerWidth, window.innerHeight, false); } } else lowHits = 0;
+      } rgbBoost *= 0.985; rgbPhase += dtt * (1 + 4 * interactive.services.userData.h + rgbBoost * 9);
       if (t - last1 > 0.066) { last1 = t; drawMain(t, interactive.projects.userData.h); drawRGB(rgbPhase); animMouse(rgbPhase); drawPhone(t); }
       gameStep(t); if (t - last2 > (G.focus ? 0.033 : 0.09)) { last2 = t; drawS2(t); if (!G.focus) drawS3(t, interactive.tools.userData.h); }
       mouse.position.x = 0.82 + par.x * 0.025; mouse.position.z = 0.52 + par.y * 0.02;
