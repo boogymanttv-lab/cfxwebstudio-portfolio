@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="bg" data-lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Проекти — Boogyman Dev</title>
+<meta name="description" content="Реални проекти на Boogyman Dev — marketplace, обучителна платформа, калкулатор и игрови инструменти.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">BD</div>
+      <span>Boogyman&nbsp;Dev</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" data-en="Home" data-bg="Начало">Начало</a>
+      <a href="services.html" data-en="Services" data-bg="Услуги">Услуги</a>
+      <a href="projects.html" class="active" data-en="Projects" data-bg="Проекти">Проекти</a>
+      <a href="about.html" data-en="About" data-bg="За мен">За мен</a>
+      <a href="contact.html" data-en="Contact" data-bg="Контакти">Контакти</a>
+    </div>
+    <div class="nav-actions">
+      <div class="lang-toggle">
+        <button data-set-lang="bg" class="active">BG</button>
+        <button data-set-lang="en">EN</button>
+      </div>
+      <a href="contact.html" class="btn btn-primary" style="padding:10px 20px;" data-en="Hire me" data-bg="Наеми ме">Наеми ме</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+    <div class="mobile-panel">
+      <a href="index.html" class="nav-link" data-en="Home" data-bg="Начало">Начало</a>
+      <a href="services.html" class="nav-link" data-en="Services" data-bg="Услуги">Услуги</a>
+      <a href="projects.html" class="nav-link active" data-en="Projects" data-bg="Проекти">Проекти</a>
+      <a href="about.html" class="nav-link" data-en="About" data-bg="За мен">За мен</a>
+      <a href="contact.html" class="nav-link" data-en="Contact" data-bg="Контакти">Контакти</a>
+      <div class="mobile-panel-actions">
+        <div class="lang-toggle">
+          <button data-set-lang="bg" class="active">BG</button>
+          <button data-set-lang="en">EN</button>
+        </div>
+        <a href="contact.html" class="btn btn-primary" data-en="Hire me" data-bg="Наеми ме">Наеми ме</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow" data-en="Projects" data-bg="Проекти">Проекти</div>
+    <h1 data-en="Selected work" data-bg="Избрани проекти">Избрани проекти</h1>
+    <p data-en="Real, shipped products — not tutorials." data-bg="Реални, готови продукти — не туториали.">Реални, готови продукти — не туториали.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="projects-grid" data-projects-grid="all"></div>
+  </div>
+</section>
+
+<section>
+  <div class="cta-band">
+    <h2 data-en="Like what you see?" data-bg="Хареса ли ти това, което видя?">Хареса ли ти това, което видя?</h2>
+    <p data-en="Let's talk about what you're building." data-bg="Да поговорим за това, което искаш да построиш.">Да поговорим за това, което искаш да построиш.</p>
+    <div class="hero-actions">
+      <a href="contact.html" class="btn btn-primary" data-en="Get in touch" data-bg="Свържи се с мен">Свържи се с мен</a>
+      <a href="services.html" class="btn btn-ghost" data-en="See services" data-bg="Виж услугите">Виж услугите</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© <span data-year>2026</span> Boogyman Dev. <span data-en="All rights reserved." data-bg="Всички права запазени.">Всички права запазени.</span></p>
+    <div class="foot-links">
+      <a href="index.html" data-en="Home" data-bg="Начало">Начало</a>
+      <a href="services.html" data-en="Services" data-bg="Услуги">Услуги</a>
+      <a href="projects.html" data-en="Projects" data-bg="Проекти">Проекти</a>
+      <a href="about.html" data-en="About" data-bg="За мен">За мен</a>
+      <a href="contact.html" data-en="Contact" data-bg="Контакти">Контакти</a>
+    </div>
+  </div>
+</footer>
+<script src="projects-data.js"></script>
+<script src="project-render.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
