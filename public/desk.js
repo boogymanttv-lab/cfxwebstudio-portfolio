@@ -304,8 +304,10 @@
   function initScene() {
     if (THREE.ColorManagement) THREE.ColorManagement.legacyMode = false;
 
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 1.5));
+    var lowEnd = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || isTouch;
+    function fakeLight(c, i) { return { intensity: i, color: new THREE.Color(c), position: new THREE.Vector3() }; }
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !lowEnd && (window.devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowEnd ? 1 : 1.5));
     renderer.shadowMap.enabled = true; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
@@ -351,10 +353,10 @@
     var rim = new THREE.PointLight(0xff1a35, 1.6, 6, 1.6); rim.position.set(0, 1.4, -0.7); scene.add(rim);
     var rimL = new THREE.PointLight(0x7a3cff, 0.8, 5, 1.6); rimL.position.set(-2.4, 1.2, 0.2); scene.add(rimL);
     var screenLight = new THREE.PointLight(0xff8a9a, 0.9, 2.6, 1.6); screenLight.position.set(0, 0.75, 0.55); scene.add(screenLight);
-    var flash = new THREE.PointLight(0xffe0c0, 0.8, 2.4, 1.6); flash.position.set(0, 1, -0.6); scene.add(flash);
+    var flash = fakeLight(0xffe0c0, 0);
     var flashTarget = new THREE.Vector3(0, 1, -0.6), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0.72), wallPt = new THREE.Vector3();
     var sun = new THREE.DirectionalLight(0xffffff, 0.3); sun.position.set(1.5, 3.5, 3);
-    sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+    sun.castShadow = !lowEnd; sun.shadow.mapSize.set(1024, 1024);
     var sc = sun.shadow.camera; sc.left = -3; sc.right = 3; sc.top = 3; sc.bottom = -3; sc.near = 0.5; sc.far = 12; sun.shadow.bias = -0.0008;
     scene.add(sun);
 
@@ -587,7 +589,7 @@
     var phC = mk(256, 512), phx = phC.getContext('2d'), phT = dyn(tex(phC));
     var phScr = new THREE.Mesh(new THREE.PlaneGeometry(0.078, 0.158), new THREE.MeshBasicMaterial({ map: phT, toneMapped: false }));
     phScr.position.set(0, 0.105, 0.0056); phScr.rotation.x = -0.32; ph.add(phScr);
-    var phLight = new THREE.PointLight(0xff3050, 0.5, 1.2, 1.6); phLight.position.set(0, 0.16, 0.12); ph.add(phLight);
+    var phLight = fakeLight(0xff3050, 0);
     function drawPhone(t) {
       var x = phx, now = new Date();
       var g = x.createLinearGradient(0, 0, 0, 512); g.addColorStop(0, '#2a0610'); g.addColorStop(1, '#0a0508'); x.fillStyle = g; x.fillRect(0, 0, 256, 512);
@@ -775,7 +777,7 @@
       for (var b = 0; b < 7; b++) { var bl = box(0.014, 0.065, 0.004, std(0x221826, { r: 0.5 }), 0, 0, 0, null, false); bl.position.set(Math.sin(b / 7 * 6.283) * 0.036, Math.cos(b / 7 * 6.283) * 0.036, 0); bl.rotation.z = -b / 7 * 6.283; f.add(bl); }
       fans.push(f);
     });
-    var pcLight = new THREE.PointLight(0xff1a35, 0.9, 1.6, 1.6); pcLight.position.set(0, 0.29, 0.4); pc.add(pcLight);
+    var pcLight = fakeLight(0xff1a35, 0);
     pc.add(hitBox(0.36, 0.66, 0.6, 0.31));
 
     var lamp = new THREE.Group(); lamp.position.set(-2.1, 0, -0.35); scene.add(lamp);
@@ -789,7 +791,7 @@
     var cone = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.2, 28, 1, true), new THREE.MeshStandardMaterial({ color: 0x0e0b10, roughness: 0.4, metalness: 0.7, side: THREE.DoubleSide })); cone.castShadow = true; head.add(cone);
     var bulb = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), bas(0xffc58a)); bulb.position.y = -0.06; head.add(bulb);
     head.add(hitBox(0.3, 0.3, 0.3, -0.05));
-    var lampSpot = new THREE.SpotLight(0xffa860, 2.6, 7, 0.75, 0.7, 1.4); lampSpot.castShadow = true; lampSpot.shadow.mapSize.set(1024, 1024); lampSpot.shadow.bias = -0.0005; scene.add(lampSpot);
+    var lampSpot = new THREE.SpotLight(0xffa860, 2.6, 7, 0.75, 0.7, 1.4); lampSpot.castShadow = false; lampSpot.shadow.bias = -0.0005; scene.add(lampSpot);
     var lampTarget = new THREE.Object3D(); lampTarget.position.set(-0.4, 0, 0.35); scene.add(lampTarget); lampSpot.target = lampTarget;
 
     var mug = new THREE.Group(); mug.position.set(-0.55, 0, 0.7); scene.add(mug);
@@ -881,7 +883,7 @@
     cyl(0.02, 0.04, 0.06, std(0x14101a, { r: 0.4, m: 0.5 }), 0, 0.36, 0, lava);
     var blobs = [];
     for (var lb = 0; lb < 4; lb++) { var bm = new THREE.Mesh(new THREE.SphereGeometry(0.022 + lb * 0.004, 14, 14), new THREE.MeshBasicMaterial({ color: LAVA[0], toneMapped: false })); bm.userData.ph = lb * 1.7; lava.add(bm); blobs.push(bm); }
-    var lavaLight = new THREE.PointLight(LAVA[0], 0.7, 1.4, 1.6); lavaLight.position.set(0, 0.2, 0.08); lava.add(lavaLight);
+    var lavaLight = fakeLight(LAVA[0], 0);
     lava.add(hitBox(0.2, 0.42, 0.2, 0.2));
     function setLava(i) { var col = LAVA[i]; lavaGlass.material.emissive.setHex(col); lavaLight.color.setHex(col); blobs.forEach(function (b) { b.material.color.setHex(col); }); }
 
@@ -1024,20 +1026,25 @@
     gl = { enterGame: enterGame, exitGame: exitGame, gameDir: gameDir, gameStart: gameStart, renderer: renderer, camera: camera, cam: cam, flyTo: flyTo, viewFor: viewFor, neon: neon, flying: false, pressKey: pressKey, hideBubble: hideBubble };
 
     /* --- цикъл --- */
-    var clock = new THREE.Clock(), last2 = 0, last1 = 0, running = true, hv = new THREE.Vector3(), prevT = 0, rgbPhase = 0, frameN = 0, fpsAcc = 0, fpsCnt = 0, fpsT = 0, pr = renderer.getPixelRatio(), lowHits = 0;
+    var clock = new THREE.Clock(), last2 = 0, last1 = 0, running = true, hv = new THREE.Vector3(), prevT = 0, rgbPhase = 0, activeUntil = 0, lastR = 0, frameN = 0, fpsAcc = 0, fpsCnt = 0, fpsT = 0, pr = renderer.getPixelRatio(), lowHits = 0;
     document.addEventListener('visibilitychange', function () { var was = running; running = !document.hidden; if (running && !was) loop(); });
+    function wake(ms) { activeUntil = Math.max(activeUntil, performance.now() + (ms || 1800)); }
+    ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) { window.addEventListener(ev, function () { wake(); }, { passive: true }); });
     function loop() {
       if (!running) return; requestAnimationFrame(loop);
+      var nowMs = performance.now(), busy = gl.flying || state.busy || G.focus || nowMs < activeUntil;
+      var cap = state.open && !state.busy ? 24 : (busy ? (lowEnd ? 60 : 1000) : 40);
+      if (nowMs - lastR < 1000 / cap - 2) return; lastR = nowMs;
       var t = clock.getElapsedTime();
       var dtt = t - prevT; prevT = t;
-      if ((frameN++ & 3) === 0) renderer.shadowMap.needsUpdate = true;
+      if ((frameN++ & 7) === 0) renderer.shadowMap.needsUpdate = true;
       if (dtt > 0 && dtt < 0.5) { fpsAcc += dtt; fpsCnt++; }
       if (t - fpsT > 3) {
         var avg = fpsCnt ? fpsAcc / fpsCnt : 0.016; fpsT = t; fpsAcc = 0; fpsCnt = 0;
-        if (avg > 0.028 && pr > 0.8) { lowHits++; if (lowHits >= 2) { lowHits = 0; pr = Math.max(0.75, pr - 0.25); renderer.setPixelRatio(pr); renderer.setSize(window.innerWidth, window.innerHeight, false); } } else lowHits = 0;
+        if (avg > 1.5 / Math.min(cap, 60) && pr > 0.8) { lowHits++; if (lowHits >= 2) { lowHits = 0; pr = Math.max(0.75, pr - 0.25); renderer.setPixelRatio(pr); renderer.setSize(window.innerWidth, window.innerHeight, false); } } else lowHits = 0;
       } rgbBoost *= 0.985; rgbPhase += dtt * (1 + 4 * interactive.services.userData.h + rgbBoost * 9);
-      if (t - last1 > 0.066) { last1 = t; drawMain(t, interactive.projects.userData.h); drawRGB(rgbPhase); animMouse(rgbPhase); drawPhone(t); }
-      gameStep(t); if (t - last2 > (G.focus ? 0.033 : 0.09)) { last2 = t; drawS2(t); if (!G.focus) drawS3(t, interactive.tools.userData.h); }
+      var sl = state.open ? 4 : 1; if (t - last1 > 0.066 * sl) { last1 = t; drawMain(t, interactive.projects.userData.h); drawRGB(rgbPhase); animMouse(rgbPhase); drawPhone(t); }
+      gameStep(t); if (t - last2 > (G.focus ? 0.033 : 0.09 * sl)) { last2 = t; drawS2(t); if (!G.focus) drawS3(t, interactive.tools.userData.h); }
       mouse.position.x = 0.82 + par.x * 0.025; mouse.position.z = 0.52 + par.y * 0.02;
       fans.forEach(function (f, i) { f.rotation.z -= 0.06 + i * 0.004 + fanBoost * 0.45; });
       steam.forEach(function (sp) { var p = (sp.userData.p + t * 0.12) % 1; sp.position.set(Math.sin(p * 9 + sp.userData.p * 20) * 0.012, 0.12 + p * 0.2, 0); var sc2 = 0.03 + p * 0.09; sp.scale.set(sc2, sc2, 1); sp.material.opacity = 0.16 * (1 + steamBoost * 2.5) * Math.sin(p * Math.PI); });
