@@ -275,8 +275,8 @@
   }
 
   var TIPS = {
-    bg: { speaker: 'Музика: вкл / изкл', neon: 'Смени цвета на неона', lamp: 'Лампа: вкл / изкл', pc: 'Turbo режим 🚀', robot: 'Кажи здрасти 👋', mug: 'Още кафе ☕', gamepad: 'Натисни START 🎮', lava: 'Смени цвета', poster1: 'Смени постера', poster2: 'Смени постера', game: 'Играй Snake 🐍' },
-    en: { speaker: 'Music: on / off', neon: 'Change the neon color', lamp: 'Lamp: on / off', pc: 'Turbo mode 🚀', robot: 'Say hi 👋', mug: 'More coffee ☕', gamepad: 'Press START 🎮', lava: 'Change color', poster1: 'Change the poster', poster2: 'Change the poster', game: 'Play Snake 🐍' }
+    bg: { speaker: 'Музика: вкл / изкл', neon: 'Смени цвета на неона', lamp: 'Лампа: вкл / изкл', pc: 'Turbo режим 🚀', robot: 'Кажи здрасти 👋', mug: 'Още кафе ☕', gamepad: 'Натисни START 🎮', lava: 'Смени цвета', poster1: 'Смени постера', poster2: 'Смени постера', game: 'Играй Snake 🐍', mouse: 'RGB режим 🌈' },
+    en: { speaker: 'Music: on / off', neon: 'Change the neon color', lamp: 'Lamp: on / off', pc: 'Turbo mode 🚀', robot: 'Say hi 👋', mug: 'More coffee ☕', gamepad: 'Press START 🎮', lava: 'Change color', poster1: 'Change the poster', poster2: 'Change the poster', game: 'Play Snake 🐍', mouse: 'RGB mode 🌈' }
   };
   function tipFor(k) { return T()[k + 'Tip'] || TIPS[lang][k] || ''; }
   var bubbleEl = $('#bubble');
@@ -391,8 +391,7 @@
     /* ================= МОНИТОР (Проекти) ================= */
     var mon = new THREE.Group(); mon.position.set(0, 0, -0.38); scene.add(mon);
     var plastic = std(0x14101a, { r: 0.45, m: 0.3 });
-    cyl(0.17, 0.2, 0.014, std(0x1c1822, { r: 0.4, m: 0.6 }), 0, 0.007, 0, mon);
-    box(0.07, 0.36, 0.04, std(0x1c1822, { r: 0.4, m: 0.6 }), 0, 0.19, -0.03, mon);
+    box(0.012, 0.004, 0.002, bas(0xff2038), 0.6, 0.385, 0.0235, mon, false);
     box(1.34, 0.78, 0.045, plastic, 0, 0.76, 0, mon);
     box(0.9, 0.46, 0.07, plastic, 0, 0.76, -0.05, mon);
     var screenC = mk(1024, 576), sctx = screenC.getContext('2d'), screenT = tex(screenC);
@@ -483,10 +482,12 @@
     drawMain(40);
 
     /* ================= КЛАВИАТУРА (Услуги) ================= */
-    var kb = new THREE.Group(); kb.position.set(0, 0, 0.5); scene.add(kb);
-    box(1.04, 0.034, 0.37, std(0x0c0a0d, { r: 0.4, m: 0.5 }), 0, 0.017, 0, kb);
+    var kb = new THREE.Group(); kb.position.set(0, 0, 0.5); kb.rotation.x = 0.05; scene.add(kb);
+    box(1.075, 0.008, 0.395, std(0x1b1721, { r: 0.3, m: 0.85 }), 0, 0.004, 0, kb);
+    box(1.06, 0.03, 0.385, std(0x0d0b10, { r: 0.35, m: 0.7 }), 0, 0.019, 0, kb);
+    box(0.36, 0.003, 0.003, bas(0xff2038), 0, 0.02, 0.1935, kb, false);
     var rgbC = mk(256, 64), rgx = rgbC.getContext('2d'), rgbT = tex(rgbC);
-    var rgbP = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.33), new THREE.MeshBasicMaterial({ map: rgbT, toneMapped: false }));
+    var rgbP = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.345), new THREE.MeshBasicMaterial({ map: rgbT, toneMapped: false }));
     rgbP.rotation.x = -Math.PI / 2; rgbP.position.y = 0.0345; kb.add(rgbP);
     function drawRGB(t) {
       for (var xx = 0; xx < 256; xx += 4) {
@@ -496,24 +497,63 @@
       rgbT.needsUpdate = true;
     }
     drawRGB(0);
-    var rows = [[14, -0.125], [14, -0.06], [13, 0.005], [12, 0.07]];
-    var keys = new THREE.InstancedMesh(new THREE.BoxGeometry(0.05, 0.022, 0.05), std(0x17131a, { r: 0.5 }), 14 + 14 + 13 + 12 + 7), ki = 0, kd = new THREE.Object3D();
-    rows.forEach(function (r) {
-      for (var c = 0; c < r[0]; c++) { kd.position.set(-0.46 + c * 0.0665 + (r[1] > -0.1 ? 0.012 : 0), 0.046, r[1]); kd.scale.set(1, 1, 1); kd.updateMatrix(); keys.setMatrixAt(ki++, kd.matrix); }
+    var KU = 0.064, KGAP = 0.008, KX0 = -0.48, KZ0 = -0.128;
+    var KROWS = [
+      ['Esc 1', '1 1', '2 1', '3 1', '4 1', '5 1', '6 1', '7 1', '8 1', '9 1', '0 1', '- 1', '= 1', '⌫ 2'],
+      ['Tab 1.5', 'Q 1', 'W 1', 'E 1', 'R 1', 'T 1', 'Y 1', 'U 1', 'I 1', 'O 1', 'P 1', '[ 1', '] 1', '\\ 1.5'],
+      ['Caps 1.75', 'A 1', 'S 1', 'D 1', 'F 1', 'G 1', 'H 1', 'J 1', 'K 1', 'L 1', '; 1', "' 1", 'Enter 2.25'],
+      ['Shift 2.25', 'Z 1', 'X 1', 'C 1', 'V 1', 'B 1', 'N 1', 'M 1', ', 1', '. 1', '/ 1', 'Shift 1.75', '↑ 1'],
+      ['Ctrl 1.25', 'Win 1.25', 'Alt 1.25', ' 6.25', 'Alt 1', 'Fn 1', '← 1', '↓ 1', '→ 1']
+    ];
+    var kcount = 0; KROWS.forEach(function (r) { kcount += r.length; });
+    var kgeo = new THREE.BoxGeometry(0.056, 0.018, 0.056), kpa = kgeo.attributes.position;
+    for (var kv = 0; kv < kpa.count; kv++) if (kpa.getY(kv) > 0) { kpa.setX(kv, kpa.getX(kv) * 0.8); kpa.setZ(kv, kpa.getZ(kv) * 0.72); }
+    kgeo.computeVertexNormals();
+    var keys = new THREE.InstancedMesh(kgeo, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.42, metalness: 0.08 }), kcount), ki = 0, kd = new THREE.Object3D();
+    var kbase = [], kcol = new THREE.Color();
+    var lgC = mk(1920, 640), lgx = lgC.getContext('2d'); lgx.textAlign = 'center'; lgx.textBaseline = 'middle';
+    KROWS.forEach(function (row, r) {
+      var cur = 0;
+      row.forEach(function (spec) {
+        var sp = spec.lastIndexOf(' '), label = spec.slice(0, sp), w = parseFloat(spec.slice(sp + 1));
+        var cx = KX0 + (cur + w / 2) * KU, sx = (w * KU - KGAP) / 0.056;
+        kd.position.set(cx, 0.047, KZ0 + r * KU); kd.scale.set(sx, 1, 1); kd.updateMatrix(); keys.setMatrixAt(ki, kd.matrix);
+        var hex = label === 'Esc' ? 0x4a0d19 : (/^[A-Z0-9;'\[\]\\,.\/=\-]$/.test(label) || label === ' ' ? 0x1b171f : 0x2b2431);
+        kbase.push(hex); keys.setColorAt(ki, kcol.setHex(hex)); ki++;
+        lgx.fillStyle = label === 'Esc' ? '#ff8a96' : 'rgba(238,228,233,.95)';
+        lgx.font = (label.length > 2 ? '700 34px' : '700 50px') + ' Consolas, "Courier New", monospace';
+        if (label.trim()) lgx.fillText(label, (cur + w / 2) * 128, (r + 0.5) * 128 + 2);
+        cur += w;
+      });
     });
-    for (var c2 = 0; c2 < 7; c2++) {
-      var sp = (c2 === 3);
-      kd.position.set(sp ? 0.0 : (c2 < 3 ? -0.46 + c2 * 0.0665 + 0.02 : 0.28 + (c2 - 4) * 0.0665 + 0.07), 0.046, 0.135);
-      kd.scale.set(sp ? 5.6 : 1, 1, 1); kd.updateMatrix(); keys.setMatrixAt(ki++, kd.matrix);
-    }
+    keys.instanceMatrix.needsUpdate = true; keys.instanceColor.needsUpdate = true;
     keys.castShadow = true; keys.receiveShadow = true; kb.add(keys);
+    var lgP = new THREE.Mesh(new THREE.PlaneGeometry(0.96, 0.32), new THREE.MeshBasicMaterial({ map: tex(lgC), transparent: true, toneMapped: false, depthWrite: false }));
+    lgP.rotation.x = -Math.PI / 2; lgP.position.set(0, 0.0564, 0); kb.add(lgP);
+    scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0.12, 0.02, 0.31), new THREE.Vector3(0.12, 0.012, 0.1), new THREE.Vector3(0.18, 0.012, -0.3), new THREE.Vector3(0.1, 0.012, -0.6)]), 24, 0.004, 6), std(0x0a0809)));
     kb.add(hitBox(1.1, 0.12, 0.42, 0.05));
     interactive.services = kb;
 
-    // мишка
-    var mouse = new THREE.Group(); mouse.position.set(0.82, 0, 0.52); scene.add(mouse);
-    var mBody = new THREE.Mesh(new THREE.CapsuleGeometry(0.033, 0.06, 6, 16), std(0x14101a, { r: 0.4, m: 0.4 })); mBody.rotation.x = Math.PI / 2; mBody.scale.set(1, 1, 0.55); mBody.position.y = 0.02; mBody.castShadow = true; mouse.add(mBody);
-    box(0.012, 0.004, 0.07, bas(0xff2038), 0, 0.034, 0.0, mouse, false);
+    // мишка (gaming, RGB)
+    var mouse = new THREE.Group(); mouse.position.set(0.82, 0, 0.52); mouse.rotation.y = 0.12; scene.add(mouse);
+    var mMat = std(0x18131d, { r: 0.3, m: 0.35 }), mDark = std(0x050407, { r: 0.6 }), rgbBoost = 0;
+    var mBody = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 24), mMat); mBody.scale.set(0.034, 0.02, 0.062); mBody.position.y = 0.016; mBody.castShadow = true; mouse.add(mBody);
+    function mY(z) { return 0.016 + 0.02 * Math.sqrt(Math.max(0, 1 - (z / 0.062) * (z / 0.062))); }
+    for (var mz = -0.054; mz < -0.005; mz += 0.012) box(0.0016, 0.002, 0.0135, mDark, 0, mY(mz) + 0.0003, mz, mouse, false);
+    box(0.016, 0.003, 0.018, mDark, 0, mY(-0.028) + 0.0004, -0.028, mouse, false);
+    var wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.0072, 0.0072, 0.006, 16), bas(0xff2038)); wheel.rotation.z = Math.PI / 2; wheel.position.set(0, mY(-0.028) + 0.0022, -0.028); mouse.add(wheel);
+    box(0.004, 0.006, 0.014, mDark, -0.0292, 0.022, -0.03, mouse, false); box(0.004, 0.006, 0.014, mDark, -0.0318, 0.022, -0.012, mouse, false);
+    var mLogo = new THREE.Mesh(new THREE.CircleGeometry(0.008, 20), bas(0xff2038)); mLogo.rotation.x = -Math.PI / 2 + 0.18; mLogo.position.set(0, mY(0.03) + 0.0006, 0.03); mouse.add(mLogo);
+    var mRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.05, 6, 40), bas(0xff2038)); mRing.rotation.x = -Math.PI / 2; mRing.scale.set(0.0345, 0.0625, 0.05); mRing.position.y = 0.0045; mouse.add(mRing);
+    var mGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.4), new THREE.MeshBasicMaterial({ map: glowTex(255, 255, 255), color: 0xff2038, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+    mGlow.rotation.x = -Math.PI / 2; mGlow.position.y = 0.0058; mouse.add(mGlow);
+    var mLight = new THREE.PointLight(0xff2038, 0.5, 0.7, 1.6); mLight.position.y = 0.06; mouse.add(mLight);
+    function animMouse(ph) {
+      var h = ((350 + 38 * Math.sin(ph * 2.4 + 0.6) + 16 * Math.sin(ph * 0.7) + 720) % 360) / 360;
+      [mRing.material, wheel.material, mLogo.material, mGlow.material].forEach(function (m) { m.color.setHSL(h, 1, 0.5); });
+      mLight.color.setHSL(h, 1, 0.55);
+    }
+    mouse.add(hitBox(0.1, 0.06, 0.15, 0.02));
     scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0.82, 0.012, 0.46), new THREE.Vector3(0.82, 0.012, 0.2), new THREE.Vector3(0.5, 0.012, -0.1), new THREE.Vector3(0.2, 0.012, -0.5)]), 24, 0.004, 6), std(0x0a0809)));
 
     // геймпад (декор)
@@ -569,9 +609,8 @@
     interactive.contact = ph;
 
     /* ================= ДЕКОР ================= */
-    var mon2 = new THREE.Group(); mon2.position.set(-1.12, 0, -0.5); mon2.rotation.y = 0.42; scene.add(mon2);
-    cyl(0.12, 0.14, 0.012, std(0x1c1822, { r: 0.4, m: 0.6 }), 0, 0.006, 0, mon2);
-    box(0.05, 0.3, 0.035, std(0x1c1822, { r: 0.4, m: 0.6 }), 0, 0.16, -0.03, mon2);
+    var mon2 = new THREE.Group(); mon2.position.set(-0.93, 0, -0.3); mon2.rotation.y = 0.42; scene.add(mon2);
+    box(0.012, 0.004, 0.002, bas(0xff2038), 0.2, 0.235, 0.021, mon2, false);
     box(0.5, 0.86, 0.04, plastic, 0, 0.64, 0, mon2);
     var s2C = mk(480, 820), s2x = s2C.getContext('2d'), s2T = tex(s2C);
     var scr2 = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.82), new THREE.MeshBasicMaterial({ map: s2T, toneMapped: false })); scr2.position.set(0, 0.64, 0.021); mon2.add(scr2);
@@ -679,6 +718,54 @@
     drawS2(0);
     mon2.add(hitBox(0.6, 0.95, 0.2, 0.64));
 
+    /* --- трети монитор (Инструменти) --- */
+    var mon3 = new THREE.Group(); mon3.position.set(0.93, 0, -0.3); mon3.rotation.y = -0.42; scene.add(mon3);
+    box(0.5, 0.86, 0.04, plastic, 0, 0.64, 0, mon3);
+    box(0.012, 0.004, 0.002, bas(0xff2038), -0.2, 0.235, 0.021, mon3, false);
+    var s3C = mk(480, 820), s3x = s3C.getContext('2d'), s3T = tex(s3C);
+    var scr3 = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.82), new THREE.MeshBasicMaterial({ map: s3T, toneMapped: false })); scr3.position.set(0, 0.64, 0.021); mon3.add(scr3);
+    var logs = ['[auto] target locked', '[ok] script running', '[ok] profile loaded', '[..] waiting for input', '[ok] sync complete', '[auto] loop #', '[ok] build passed', '[ok] bot online'];
+    function drawS3(t, hv) {
+      var x = s3x, hot = Math.min(1, (hv || 0) * 1.2), pul = 0.5 + 0.5 * Math.sin(t * 4);
+      x.textAlign = 'left'; x.fillStyle = '#0a070d'; x.fillRect(0, 0, 480, 820);
+      var rg = x.createRadialGradient(400, 40, 10, 400, 40, 380); rg.addColorStop(0, 'rgba(255,42,61,.22)'); rg.addColorStop(1, 'rgba(255,42,61,0)'); x.fillStyle = rg; x.fillRect(0, 0, 480, 820);
+      x.fillStyle = '#ff2a3d'; x.shadowColor = '#ff2a3d'; x.shadowBlur = 12; x.font = '800 36px Segoe UI, Arial'; x.fillText('CFXWEBSTUDIO', 26, 62); x.shadowBlur = 0;
+      x.fillStyle = '#e8dede'; x.font = '600 19px Segoe UI, Arial'; x.fillText('BoogymanCFX  //  TOOLS', 28, 94);
+      var bars = [['CPU', 0.45 + 0.3 * Math.sin(t * 1.3), '#ff2a3d'], ['RAM', 0.6 + 0.15 * Math.sin(t * 0.7), '#ff9a3d'], ['NET', 0.5 + 0.4 * Math.sin(t * 2.1), '#7a3cff']];
+      bars.forEach(function (b, i) { var y = 140 + i * 62; x.fillStyle = '#9a8a92'; x.font = '600 16px Consolas, monospace'; x.fillText(b[0], 28, y); x.fillStyle = '#1a1420'; x.fillRect(28, y + 10, 424, 16); x.fillStyle = b[2]; x.fillRect(28, y + 10, 424 * Math.max(0.05, Math.min(1, b[1])), 16); });
+      x.strokeStyle = 'rgba(255,255,255,.08)'; x.lineWidth = 1; x.strokeRect(28, 340, 424, 90);
+      x.strokeStyle = '#6ee7f0'; x.lineWidth = 2; x.beginPath();
+      for (var gx = 0; gx <= 424; gx += 6) { var gy = 385 + 28 * Math.sin(gx * 0.04 + t * 2.2) + 14 * Math.sin(gx * 0.11 - t * 3.1); gx ? x.lineTo(28 + gx, gy) : x.moveTo(28 + gx, gy); }
+      x.stroke();
+      x.font = '16px Consolas, monospace';
+      for (var i = 0; i < 12; i++) { var idx = (Math.floor(t * 1.6) + i) % logs.length; x.fillStyle = i === 11 ? '#ff5a6e' : 'rgba(200,180,186,' + (0.25 + i * 0.05) + ')'; x.fillText(logs[idx] + (idx === 5 ? (Math.floor(t * 1.6) + i) : ''), 28, 470 + i * 24); }
+      var BY = 748, BH = 46 + hot * 6;
+      x.save(); x.shadowColor = '#ff2a3d'; x.shadowBlur = 10 + pul * 14 + hot * 16; x.fillStyle = hot > 0.3 ? '#ff2a3d' : 'rgba(255,42,61,' + (0.16 + pul * 0.1) + ')'; rr(x, 28, BY, 424, BH, BH / 2); x.fill(); x.strokeStyle = 'rgba(255,42,61,.8)'; x.lineWidth = 2; x.stroke(); x.restore();
+      x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = '800 19px Segoe UI, Arial'; x.fillText('▶  ' + bg('КЛИКНИ — ИНСТРУМЕНТИ', 'CLICK — TOOLS'), 240, BY + BH / 2 + 7); x.textAlign = 'left';
+      s3T.needsUpdate = true;
+    }
+    mon3.add(hitBox(0.6, 0.95, 0.2, 0.64));
+
+    /* --- стойка за 3 монитора --- */
+    var metal = std(0x2a2630, { r: 0.35, m: 0.85 }), metalL = std(0x413b4b, { r: 0.28, m: 0.9 });
+    function rod(a, b2, r, mat) {
+      var d = new THREE.Vector3().subVectors(b2, a), len = d.length(), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 12), mat);
+      m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); m.castShadow = true; scene.add(m); return m;
+    }
+    box(2.5, 0.022, 0.085, metal, 0, 0.011, -0.62, scene);
+    box(2.38, 0.004, 0.004, bas(0xff2038), 0, 0.0235, -0.585, scene, false);
+    box(0.06, 0.03, 0.09, metalL, -1.25, 0.015, -0.62, scene); box(0.06, 0.03, 0.09, metalL, 1.25, 0.015, -0.62, scene);
+    mon.updateMatrixWorld(true); mon2.updateMatrixWorld(true); mon3.updateMatrixWorld(true);
+    [[0, mon, 0.76, -0.098], [-0.93, mon2, 0.64, -0.034], [0.93, mon3, 0.64, -0.034]].forEach(function (s) {
+      var px = s[0], pm = s[1];
+      cyl(0.05, 0.055, 0.014, metalL, px, 0.029, -0.62, scene, 28);
+      cyl(0.014, 0.014, 0.66, metalL, px, 0.36, -0.62, scene, 16);
+      cyl(0.022, 0.022, 0.05, metal, px, 0.7, -0.62, scene, 16);
+      var tip = pm.localToWorld(new THREE.Vector3(0, s[2], s[3]));
+      rod(new THREE.Vector3(px, 0.7, -0.62), tip, 0.011, metalL);
+      box(0.1, 0.1, 0.012, metal, 0, s[2], s[3] - 0.004, pm, false);
+    });
+
     var pc = new THREE.Group(); pc.position.set(1.95, 0, -0.42); pc.rotation.y = -0.38; scene.add(pc);
     box(0.28, 0.58, 0.5, std(0x0c0a0e, { r: 0.35, m: 0.6 }), 0, 0.29, 0, pc);
     var glass = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.52), std(0x16101c, { r: 0.1, m: 0.2, t: true, o: 0.5 })); glass.position.set(0, 0.29, 0.2515); pc.add(glass);
@@ -777,7 +864,7 @@
     rob.add(hitBox(0.24, 0.4, 0.22, 0.15));
 
     // колонка (Музика вкл/изкл) — пулсира в такта
-    var spk = new THREE.Group(); spk.position.set(0.98, 0, -0.2); spk.rotation.y = -0.18; scene.add(spk);
+    var spk = new THREE.Group(); spk.position.set(1.42, 0, -0.2); spk.rotation.y = -0.18; scene.add(spk);
     box(0.17, 0.3, 0.16, std(0x14101a, { r: 0.5, m: 0.2 }), 0, 0.15, 0, spk);
     var woofer = new THREE.Group(); woofer.position.set(0, 0.105, 0.082); spk.add(woofer);
     var wcone = cyl(0.056, 0.05, 0.022, std(0x2a2430, { r: 0.7 }), 0, 0, 0, woofer, 28); wcone.rotation.x = Math.PI / 2;
@@ -788,7 +875,7 @@
     spk.add(hitBox(0.24, 0.36, 0.22, 0.17));
 
     // лава лампа (клик сменя цвета)
-    var lava = new THREE.Group(); lava.position.set(1.5, 0, -0.45); scene.add(lava);
+    var lava = new THREE.Group(); lava.position.set(1.68, 0, -0.52); scene.add(lava);
     var LAVA = [0xff2a5a, 0x35e0ff, 0xb36bff, 0x6dff9f], lavaIdx = 0;
     cyl(0.06, 0.07, 0.05, std(0x14101a, { r: 0.4, m: 0.5 }), 0, 0.025, 0, lava);
     var lavaGlass = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.055, 0.28, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0x220610, emissive: LAVA[0], emissiveIntensity: 0.35, transparent: true, opacity: 0.4, roughness: 0.2, side: THREE.DoubleSide, depthWrite: false })); lavaGlass.position.y = 0.19; lava.add(lavaGlass);
@@ -850,7 +937,10 @@
     // натискане на клавишите (реалната клавиатура натиска 3D клавиши)
     var tmpM = new THREE.Matrix4(), kp3 = new THREE.Vector3(), kq = new THREE.Quaternion(), ks = new THREE.Vector3();
     function moveKey(i, dy) { keys.getMatrixAt(i, tmpM); tmpM.decompose(kp3, kq, ks); kd.position.set(kp3.x, kp3.y + dy, kp3.z); kd.quaternion.copy(kq); kd.scale.copy(ks); kd.updateMatrix(); keys.setMatrixAt(i, kd.matrix); keys.instanceMatrix.needsUpdate = true; }
-    function pressKey() { var i = Math.floor(Math.random() * ki); moveKey(i, -0.012); setTimeout(function () { moveKey(i, 0.012); }, 110); }
+    function pressKey() {
+      var i = Math.floor(Math.random() * ki); moveKey(i, -0.007); keys.setColorAt(i, kcol.setHex(0xff2a3d)); keys.instanceColor.needsUpdate = true;
+      setTimeout(function () { moveKey(i, 0.007); keys.setColorAt(i, kcol.setHex(kbase[i])); keys.instanceColor.needsUpdate = true; }, 110);
+    }
 
     var dustN = 140, dustG = new THREE.BufferGeometry(), dp = new Float32Array(dustN * 3);
     for (var d = 0; d < dustN; d++) { dp[d * 3] = (Math.random() - 0.5) * 5; dp[d * 3 + 1] = Math.random() * 2.4; dp[d * 3 + 2] = -0.8 + Math.random() * 2.4; }
@@ -858,7 +948,7 @@
     var dust = new THREE.Points(dustG, new THREE.PointsMaterial({ color: 0xffb89a, size: 0.018, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false })); scene.add(dust);
 
     /* --- интерактивни групи --- */
-    interactive.game = mon2; interactive.speaker = spk; interactive.lamp = lamp; interactive.pc = pc; interactive.robot = rob; interactive.mug = mug; interactive.gamepad = pad2; interactive.lava = lava;
+    interactive.game = mon2; interactive.tools = mon3; interactive.mouse = mouse; interactive.speaker = spk; interactive.lamp = lamp; interactive.pc = pc; interactive.robot = rob; interactive.mug = mug; interactive.gamepad = pad2; interactive.lava = lava;
     interactive.neon = neonG; interactive.poster1 = poster1; interactive.poster2 = poster2;
     Object.keys(interactive).forEach(function (name) {
       var g = interactive[name]; g.userData.h = 0; g.userData.mats = [];
@@ -875,8 +965,8 @@
       services: { pos: [0, 0.8, 2.0], look: [0, 0.03, 0.5] },
       about: { pos: [-0.55, 0.6, 1.55], look: [-1.0, 0.2, 0.32] },
       contact: { pos: [0.95, 0.55, 1.75], look: [1.28, 0.1, 0.58] },
-      tools: { pos: [-0.5, 0.85, 1.55], look: [-1.12, 0.64, -0.5] },
-      game: { pos: [-0.55, 0.68, 0.85], look: [-1.12, 0.64, -0.5] },
+      tools: { pos: [0.36, 0.7, 0.98], look: [0.93, 0.64, -0.3] },
+      game: { pos: [-0.36, 0.68, 0.98], look: [-0.93, 0.64, -0.3] },
       desktop: { pos: [0, 0.86, 1.6], look: [0, 0.74, -0.38] }
     };
     var cam = { pos: new THREE.Vector3(0, 2.8, 8), look: new THREE.Vector3(0, 0.6, 0) };
@@ -940,9 +1030,10 @@
     function loop() {
       if (!running) return; requestAnimationFrame(loop);
       var t = clock.getElapsedTime();
-      var dtt = t - prevT; prevT = t; rgbPhase += dtt * (1 + 4 * interactive.services.userData.h);
-      if (t - last1 > 0.066) { last1 = t; drawMain(t, interactive.projects.userData.h); drawRGB(rgbPhase); drawPhone(t); }
-      gameStep(t); if (t - last2 > (G.focus ? 0.033 : 0.09)) { last2 = t; drawS2(t); }
+      var dtt = t - prevT; prevT = t; rgbBoost *= 0.985; rgbPhase += dtt * (1 + 4 * interactive.services.userData.h + rgbBoost * 9);
+      if (t - last1 > 0.066) { last1 = t; drawMain(t, interactive.projects.userData.h); drawRGB(rgbPhase); animMouse(rgbPhase); drawPhone(t); }
+      gameStep(t); if (t - last2 > (G.focus ? 0.033 : 0.09)) { last2 = t; drawS2(t); if (!G.focus) drawS3(t, interactive.tools.userData.h); }
+      mouse.position.x = 0.82 + par.x * 0.025; mouse.position.z = 0.52 + par.y * 0.02;
       fans.forEach(function (f, i) { f.rotation.z -= 0.06 + i * 0.004 + fanBoost * 0.45; });
       steam.forEach(function (sp) { var p = (sp.userData.p + t * 0.12) % 1; sp.position.set(Math.sin(p * 9 + sp.userData.p * 20) * 0.012, 0.12 + p * 0.2, 0); var sc2 = 0.03 + p * 0.09; sp.scale.set(sc2, sc2, 1); sp.material.opacity = 0.16 * (1 + steamBoost * 2.5) * Math.sin(p * Math.PI); });
       var dpA = dust.geometry.attributes.position;
